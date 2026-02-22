@@ -1,16 +1,37 @@
 const Game = {
   score: 0,
   level: 1,
+  life: 100,
+  maxLife: 100,
   levelThreshold: 100,
   maxLevel: typeof MAX_LEVEL !== 'undefined' ? MAX_LEVEL : 10,
   difficulty: null,
+  evolutionCount: 0,
 
   init(difficultyKey) {
     this.score = 0;
     this.level = 1;
+    this.life = 100;
+    this.maxLife = 100;
+    this.evolutionCount = 0;
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
     this.difficulty = diff;
     this.levelThreshold = diff.levelThreshold;
+  },
+
+  damageLife(amount) {
+    this.life = Math.max(0, this.life - amount);
+  },
+
+  getLifeDamage(item) {
+    if (!item || item.score >= 0) return 0;
+    const base = (100 / (this.difficulty.hitsToDie || 10)) || 10;
+    const mult = item.lifeDamage || 1;
+    return base * mult;
+  },
+
+  isGameOver() {
+    return this.life <= 0;
   },
 
   addScore(delta) {

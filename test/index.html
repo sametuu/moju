@@ -148,12 +148,12 @@
       test('進化時にevolutionエフェクトが発動する', () => {
         Game.init();
         CharacterManager.characterId = 'moju';
-        Game.score = 500;
-        Game.level = 5;
-        const evo = CharacterManager.tryEvolve(5);
+        Game.score = 300;
+        Game.level = 3;
+        const evo = CharacterManager.tryEvolve(3);
         assert(evo !== null, 'evolution available');
         assert(evo.oldCharId === 'moju', 'old char');
-        assert(evo.newCharId === 'iyadosu', 'new char');
+        assert(evo.newCharId === 'moju_nasi', 'new char');
 
         Effects.triggerEvolution(evo.oldCharId, evo.newCharId, () => {
           CharacterManager.evolveTo(evo.newCharId);

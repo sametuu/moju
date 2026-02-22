@@ -11,11 +11,16 @@ const ItemManager = {
     this.items = [];
     this.lastSpawn = 0;
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
-    this.spawnInterval = diff.spawnInterval;
+    this.baseFallSpeed = diff.fallSpeed;
     this.fallSpeed = diff.fallSpeed;
+    this.spawnInterval = window.DEBUG_MODE ? 300 : diff.spawnInterval;
     this.itemSize = diff.itemSize;
     this.totalWeight = ITEMS.reduce((sum, item) => sum + item.weight, 0);
     this.preloadImages();
+  },
+
+  increaseSpeed() {
+    this.fallSpeed = Math.min(this.fallSpeed * 1.15, this.baseFallSpeed * 2.5);
   },
 
   preloadImages() {
@@ -31,17 +36,22 @@ const ItemManager = {
   },
 
   getRandomItem() {
-    let r = Math.random() * this.totalWeight;
-    for (const item of ITEMS) {
+    const pool = window.DEBUG_MODE ? ITEMS.filter(i => i.score > 0) : ITEMS;
+    if (pool.length === 0) return { ...ITEMS[0] };
+    const total = pool.reduce((s, i) => s + i.weight, 0);
+    let r = Math.random() * total;
+    for (const item of pool) {
       r -= item.weight;
       if (r <= 0) return { ...item };
     }
-    return { ...ITEMS[0] };
+    return { ...pool[0] };
   },
 
   spawn() {
     const item = this.getRandomItem();
-    const x = Math.random() * (window.innerWidth - this.itemSize) + this.itemSize / 2;
+    const x = window.DEBUG_MODE
+      ? window.innerWidth / 2
+      : Math.random() * (window.innerWidth - this.itemSize) + this.itemSize / 2;
     this.items.push({
       ...item,
       x,

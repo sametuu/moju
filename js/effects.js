@@ -164,11 +164,14 @@ const Effects = {
     ctx.restore();
   },
 
-  drawEvolution(ctx, characterX, characterY, characterSize) {
+  drawEvolution(ctx, _characterX, _characterY, characterSize) {
     if (!this.evolution.active) return;
     const t = this.evolution.progress / this.evolution.duration;
     const w = window.innerWidth;
     const h = window.innerHeight;
+    const centerX = w / 2;
+    const iconCenterY = h * 0.35;
+    const textBaseY = h * 0.82;
 
     if (t < 0.2) {
       const a = t / 0.2;
@@ -184,8 +187,8 @@ const Effects = {
       const img = CharacterManager.images[this.evolution.oldCharId];
       if (img && img.complete) {
         ctx.drawImage(img,
-          characterX - characterSize * pulse / 2,
-          characterY - characterSize * pulse / 2,
+          centerX - characterSize * pulse / 2,
+          iconCenterY - characterSize * pulse / 2,
           characterSize * pulse,
           characterSize * pulse);
       }
@@ -200,32 +203,32 @@ const Effects = {
       const img = CharacterManager.images[this.evolution.newCharId];
       if (img && img.complete) {
         ctx.drawImage(img,
-          characterX - characterSize * scale / 2,
-          characterY - characterSize * scale / 2,
+          centerX - characterSize * scale / 2,
+          iconCenterY - characterSize * scale / 2,
           characterSize * scale,
           characterSize * scale);
       }
       ctx.restore();
     } else {
-      const overlayAlpha = (t - 0.6) / 0.2;
-      ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(overlayAlpha * 0.3, 0.3)})`;
+      ctx.fillStyle = `rgba(255, 255, 255, ${Math.min((t - 0.6) / 0.2 * 0.3, 0.3)})`;
       ctx.fillRect(0, 0, w, h);
       const img = CharacterManager.images[this.evolution.newCharId];
       if (img && img.complete) {
         ctx.drawImage(img,
-          characterX - characterSize / 2,
-          characterY - characterSize / 2,
+          centerX - characterSize / 2,
+          iconCenterY - characterSize / 2,
           characterSize,
           characterSize);
       }
       const char = CHARACTERS[this.evolution.newCharId];
       if (char) {
+        const overlayAlpha = (t - 0.6) / 0.2;
         ctx.fillStyle = `rgba(0,0,0,${0.9 - overlayAlpha * 0.5})`;
         ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('進化!', w / 2, h / 2 - 80);
+        ctx.fillText('進化!', centerX, textBaseY);
         ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(char.name + ' に進化した!', w / 2, h / 2 - 45);
+        ctx.fillText(char.name + ' に進化した!', centerX, textBaseY + 45);
       }
     }
   },

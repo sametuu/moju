@@ -16,6 +16,7 @@ const CharacterManager = {
     this.characterId = DEFAULT_CHARACTER_ID;
 
     const loadPromises = Object.values(CHARACTERS).map(char => {
+        img.onerror = () => resolve();
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => resolve();
@@ -27,11 +28,16 @@ const CharacterManager = {
   },
 
   setTarget(x, y) {
+    if (window.DEBUG_MODE) return;
     this.targetX = Math.max(this.size / 2, Math.min(window.innerWidth - this.size / 2, x));
     this.targetY = Math.max(this.size / 2, Math.min(window.innerHeight - this.size / 2, y));
   },
 
   update(dt) {
+    if (window.DEBUG_MODE) {
+      this.targetX = window.innerWidth / 2;
+      this.targetY = window.innerHeight / 2;
+    }
     this.x += (this.targetX - this.x) * this.lerpSpeed;
     this.y += (this.targetY - this.y) * this.lerpSpeed;
   },

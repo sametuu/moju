@@ -19,10 +19,10 @@ const ITEMS = [
   { id: 'earring', name: 'イヤリング', score: 11, weight: 3, color: '#ffd700', emoji: '1f48e' },
   { id: 'bracelet', name: 'ブレスレット', score: 13, weight: 2, color: '#f0e68c', emoji: '1f4ff' },
   { id: 'cream', name: 'クリーム', score: 9, weight: 3, color: '#fffacd', emoji: '1f9f4' },
-  // 減点（男性向け） weight 1-2
-  { id: 'smartphone', name: 'スマホ', score: -15, weight: 1, color: '#2f4f4f', emoji: '1f4f1' },
-  { id: 'robot', name: 'ロボット', score: -20, weight: 1, color: '#708090', emoji: '1f916' },
-  { id: 'gamepad', name: 'ゲーム機', score: -18, weight: 1, color: '#4a4a4a', emoji: '1f3ae' },
-  { id: 'drone', name: 'ドローン', score: -12, weight: 2, color: '#696969', emoji: '1f681' },
-  { id: 'headphone', name: 'ヘッドホン', score: -10, weight: 2, color: '#808080', emoji: '1f3a7' }
+  // 減点（男性向け） weight 1-2, lifeDamage: ライフ減少倍率（1.0=標準）
+  { id: 'smartphone', name: 'スマホ', score: -15, weight: 1, color: '#2f4f4f', emoji: '1f4f1', lifeDamage: 1.0 },
+  { id: 'robot', name: 'ロボット', score: -20, weight: 1, color: '#708090', emoji: '1f916', lifeDamage: 1.2 },
+  { id: 'gamepad', name: 'ゲーム機', score: -18, weight: 1, color: '#4a4a4a', emoji: '1f3ae', lifeDamage: 1.1 },
+  { id: 'drone', name: 'ドローン', score: -12, weight: 2, color: '#696969', emoji: '1f681', lifeDamage: 0.8 },
+  { id: 'headphone', name: 'ヘッドホン', score: -10, weight: 2, color: '#808080', emoji: '1f3a7', lifeDamage: 0.7 }
 ];

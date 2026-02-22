@@ -102,3 +102,35 @@ html, body {
   line-height: 1.6;
   max-width: 90%;
 }
+
+.gameover-title {
+  font-size: clamp(24px, 8vw, 36px);
+  color: #c00;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.gameover-sub {
+  font-size: clamp(14px, 4vw, 18px);
+  color: #555;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.in-game-home-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 5;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  cursor: pointer;
+}
+
+.in-game-home-btn.hidden {
+  display: none;
+}

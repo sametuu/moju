@@ -30,6 +30,17 @@
     <button id="homeBtn" class="btn">ホームに戻る</button>
   </div>
 
+  <button id="inGameHomeBtn" class="in-game-home-btn hidden">ホームに戻る</button>
+
+  <div id="gameOverScreen" class="overlay hidden">
+    <h2 class="gameover-title">ゲームオーバー</h2>
+    <p class="gameover-sub">ライフがゼロになりました</p>
+    <button id="retryBtn" class="btn">ホームに戻る</button>
+  </div>
+
+  <script>
+    window.DEBUG_MODE = /[?&]debug=(1|true)/i.test(location.search);
+  </script>
   <script src="js/data/config.js"></script>
   <script src="js/data/characters.js"></script>
   <script src="js/data/items.js"></script>
