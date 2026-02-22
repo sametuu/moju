@@ -1,4 +1,49 @@
 (function() {
+  const STORAGE_KEY = 'moju_highscores';
+  const HighScore = {
+    load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        const def = { score: 0, level: 1 };
+        return {
+          easy: this._normalize(parsed.easy),
+          normal: this._normalize(parsed.normal),
+          hard: this._normalize(parsed.hard)
+        };
+      } catch {
+        return { easy: { score: 0, level: 1 }, normal: { score: 0, level: 1 }, hard: { score: 0, level: 1 } };
+      }
+    },
+    _normalize(v) {
+      if (!v) return { score: 0, level: 1 };
+      if (typeof v === 'number') return { score: v, level: 1 };
+      return { score: v.score ?? 0, level: v.level ?? 1 };
+    },
+    save(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.warn('HighScore save failed:', e);
+      }
+    },
+    get(difficultyKey) {
+      const s = this.load();
+      return s[difficultyKey] ?? { score: 0, level: 1 };
+    },
+    update(difficultyKey, score, level) {
+      const s = this.load();
+      const prev = this.get(difficultyKey);
+      const isBetter = score > prev.score || (score === prev.score && level > prev.level);
+      if (isBetter) {
+        s[difficultyKey] = { score, level };
+        this.save(s);
+        return true;
+      }
+      return false;
+    }
+  };
+
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const homeScreen = document.getElementById('homeScreen');
@@ -11,9 +56,21 @@
   const homeBtn = document.getElementById('homeBtn');
   const retryBtn = document.getElementById('retryBtn');
   const difficultySelect = document.getElementById('difficultySelect');
+  const highScoreDisplay = document.getElementById('highScoreDisplay');
   let lastTime = 0;
   let rafId = null;
   let gameState = 'HOME';
+
+  function updateHighScoreDisplay() {
+    if (!highScoreDisplay) return;
+    const data = HighScore.load();
+    const names = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい' };
+    const lines = ['easy', 'normal', 'hard'].map(k => {
+      const h = data[k] ?? { score: 0, level: 1 };
+      return `${names[k]}: Lv.${h.level} ${h.score}`;
+    });
+    highScoreDisplay.textContent = '最高記録　' + lines.join('　');
+  }
 
   function resizeCanvas() {
     const dpr = window.devicePixelRatio || 1;
@@ -96,9 +153,16 @@
 
     if (Game.isGameOver()) {
       gameState = 'GAME_OVER';
+      const diffKey = Game.difficultyKey || 'normal';
+      const score = Game.getScore();
+      const level = Game.getLevel();
+      const isNewRecord = diffKey ? HighScore.update(diffKey, score, level) : false;
       if (gameOverStats) {
         const diffName = Game.difficulty ? Game.difficulty.name : 'ふつう';
-        gameOverStats.textContent = `難易度: ${diffName}　レベル: ${Game.getLevel()}　スコア: ${Game.getScore()}　ライフ: ${Math.floor(Game.life)}`;
+        const high = diffKey ? HighScore.get(diffKey) : { score: 0, level: 1 };
+        let text = `難易度: ${diffName}　レベル: ${level}　スコア: ${score}　ライフ: ${Math.floor(Game.life)}`;
+        if (high.score > 0 || high.level > 1) text += `　最高: Lv.${high.level} ${high.score}` + (isNewRecord ? '（NEW!）' : '');
+        gameOverStats.textContent = text;
       }
       gameOverScreen.classList.remove('hidden');
       rafId = requestAnimationFrame(gameLoop);
@@ -107,9 +171,16 @@
 
     if (Game.isCleared()) {
       gameState = 'COMPLETING';
+      const diffKey = Game.difficultyKey || 'normal';
+      const score = Game.getScore();
+      const level = Game.getLevel();
+      const isNewRecord = diffKey ? HighScore.update(diffKey, score, level) : false;
       if (completionStats) {
         const diffName = Game.difficulty ? Game.difficulty.name : 'ふつう';
-        completionStats.textContent = `難易度: ${diffName}　スコア: ${Game.getScore()}　残りライフ: ${Math.floor(Game.life)}`;
+        const high = diffKey ? HighScore.get(diffKey) : { score: 0, level: 1 };
+        let text = `難易度: ${diffName}　スコア: ${score}　残りライフ: ${Math.floor(Game.life)}`;
+        if (high.score > 0 || high.level > 1) text += `　最高: Lv.${high.level} ${high.score}` + (isNewRecord ? '（NEW!）' : '');
+        completionStats.textContent = text;
       }
       Effects.triggerCompletion(() => {
         completionScreen.classList.remove('hidden');
@@ -250,6 +321,7 @@
     homeScreen.classList.remove('hidden');
     homeScreen.style.display = 'flex';
     gameState = 'HOME';
+    updateHighScoreDisplay();
   }
 
   async function init() {
@@ -278,6 +350,9 @@
     } catch (e) {
       console.error('CharacterManager.init failed:', e);
     }
+
+    updateHighScoreDisplay();
+    difficultySelect?.addEventListener('change', updateHighScoreDisplay);
 
     if (window.DEBUG_MODE) {
       homeScreen.classList.remove('hidden');

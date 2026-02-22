@@ -14,7 +14,9 @@ const Game = {
     this.life = 100;
     this.maxLife = 100;
     this.evolutionCount = 0;
-    const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
+    const key = difficultyKey || DEFAULT_DIFFICULTY;
+    const diff = DIFFICULTIES[key] || DIFFICULTIES.normal;
+    this.difficultyKey = key;
     this.difficulty = diff;
     this.levelThreshold = typeof LEVEL_THRESHOLD !== 'undefined' ? LEVEL_THRESHOLD : 100;
     this.maxLevel = diff.maxLevel;
