@@ -195,17 +195,17 @@ const Effects = {
           characterSize,
           characterSize);
       }
-      const char = CHARACTERS[this.evolution.newCharId];
-      if (char) {
+      const oldChar = CHARACTERS[this.evolution.oldCharId];
+      const newChar = CHARACTERS[this.evolution.newCharId];
+      if (oldChar && newChar) {
         const iconBottom = centerY + characterSize / 2;
         const lineGap = 40;
-        const textY = Math.min(iconBottom + lineGap, h - 90);
+        const textY = Math.min(iconBottom + lineGap, h - 120);
         ctx.fillStyle = `rgba(0,0,0,${textAlpha})`;
-        ctx.font = 'bold 32px sans-serif';
+        ctx.font = 'bold 18px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('進化!', centerX, textY);
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(char.name + ' に進化した!', centerX, textY + 36);
+        ctx.fillText('おめでとう！', centerX, textY);
+        ctx.fillText(`${oldChar.name} は ${newChar.name} に進化した！`, centerX, textY + 32);
       }
     };
 

@@ -42,7 +42,9 @@ const ItemManager = {
   },
 
   getRandomItem() {
-    const pool = window.DEBUG_MODE ? ITEMS.filter(i => i.score > 0) : ITEMS;
+    const level = Game.getLevel();
+    const pool = (window.DEBUG_MODE ? ITEMS.filter(i => i.score > 0) : ITEMS)
+      .filter(i => (i.unlockLevel ?? 1) <= level);
     if (pool.length === 0) return { ...ITEMS[0] };
     const total = pool.reduce((s, i) => s + i.weight, 0);
     let r = Math.random() * total;

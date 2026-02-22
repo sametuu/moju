@@ -12,7 +12,7 @@
   <canvas id="gameCanvas"></canvas>
 
   <div id="homeScreen" class="overlay">
-    <h1 class="title">もじゅゲーム</h1>
+    <h1 class="title">もじゅのだいぼうけん</h1>
     <p class="subtitle">アイテムを集めてキャラを進化させよう！</p>
     <div class="difficulty">
       <label>難易度:</label>
@@ -23,7 +23,7 @@
       </select>
     </div>
     <button id="startBtn" class="btn">冒険に出発！</button>
-    <span class="version">v0.0.4</span>
+    <span class="version">v0.0.5</span>
   </div>
 
   <div id="completionScreen" class="overlay hidden">
@@ -37,6 +37,7 @@
   <div id="gameOverScreen" class="overlay hidden">
     <h2 class="gameover-title">ゲームオーバー</h2>
     <p class="gameover-sub">ライフがゼロになりました</p>
+    <p id="gameOverStats" class="gameover-stats"></p>
     <button id="retryBtn" class="btn">ホームに戻る</button>
   </div>
 

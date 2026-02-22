@@ -1,7 +1,7 @@
 // ゲーム設定ファイル
 
-// クリア条件: このレベルに達するとクリア（pc_master到達）
-const MAX_LEVEL = 45;
+// クリア条件: このレベルに達するとクリア（pc_master到達後、全アイテム出現はLv50）
+const MAX_LEVEL = 100;
 
 // キャラクター進化設定（進化に必要なレベルは徐々に増加）
 const EVOLUTIONS = {

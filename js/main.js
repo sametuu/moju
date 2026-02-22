@@ -5,6 +5,7 @@
   const completionScreen = document.getElementById('completionScreen');
   const completionStats = document.getElementById('completionStats');
   const gameOverScreen = document.getElementById('gameOverScreen');
+  const gameOverStats = document.getElementById('gameOverStats');
   const inGameHomeBtn = document.getElementById('inGameHomeBtn');
   const startBtn = document.getElementById('startBtn');
   const homeBtn = document.getElementById('homeBtn');
@@ -88,6 +89,10 @@
 
     if (Game.isGameOver()) {
       gameState = 'GAME_OVER';
+      if (gameOverStats) {
+        const diffName = Game.difficulty ? Game.difficulty.name : 'ふつう';
+        gameOverStats.textContent = `難易度: ${diffName}　レベル: ${Game.getLevel()}　スコア: ${Game.getScore()}　ライフ: ${Math.floor(Game.life)}`;
+      }
       gameOverScreen.classList.remove('hidden');
       rafId = requestAnimationFrame(gameLoop);
       return;
