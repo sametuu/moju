@@ -4,7 +4,10 @@ const Effects = {
   evolution: {
     active: false,
     progress: 0,
-    duration: 2500,
+    duration: 3500,
+    fadeInDuration: 2000,
+    holdDuration: 1000,
+    fadeOutDuration: 500,
     oldCharId: null,
     newCharId: null,
     onComplete: null
@@ -59,7 +62,10 @@ const Effects = {
     this.evolution = {
       active: true,
       progress: 0,
-      duration: 2500,
+      duration: 3500,
+      fadeInDuration: 2000,
+      holdDuration: 1000,
+      fadeOutDuration: 500,
       oldCharId,
       newCharId,
       onComplete
@@ -166,52 +172,20 @@ const Effects = {
 
   drawEvolution(ctx, characterX, characterY, characterSize) {
     if (!this.evolution.active) return;
-    const t = this.evolution.progress / this.evolution.duration;
+    const progress = this.evolution.progress;
+    const fadeInDur = this.evolution.fadeInDuration || 2000;
+    const holdDur = this.evolution.holdDuration || 1000;
+    const fadeDur = this.evolution.fadeOutDuration || 500;
+    const holdStart = fadeInDur;
+    const fadeStart = holdStart + holdDur;
     const dpr = window.devicePixelRatio || 1;
     const w = ctx.canvas.width / dpr;
     const h = ctx.canvas.height / dpr;
     const centerX = w / 2;
     const centerY = h / 2;
 
-    if (t < 0.2) {
-      const a = t / 0.2;
-      ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;
-      ctx.fillRect(0, 0, w, h);
-    } else if (t < 0.4) {
+    const drawFinalState = (textAlpha) => {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.fillRect(0, 0, w, h);
-      const fadeOut = (t - 0.2) / 0.2;
-      const pulse = 1 + Math.sin(t * 50) * 0.08;
-      ctx.save();
-      ctx.globalAlpha = 1 - fadeOut;
-      const img = CharacterManager.images[this.evolution.oldCharId];
-      if (img && img.complete) {
-        ctx.drawImage(img,
-          centerX - characterSize * pulse / 2,
-          centerY - characterSize * pulse / 2,
-          characterSize * pulse,
-          characterSize * pulse);
-      }
-      ctx.restore();
-    } else if (t < 0.6) {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-      ctx.fillRect(0, 0, w, h);
-      const fadeIn = (t - 0.4) / 0.2;
-      const scale = 0.3 + fadeIn * 0.7;
-      ctx.save();
-      ctx.globalAlpha = fadeIn;
-      const img = CharacterManager.images[this.evolution.newCharId];
-      if (img && img.complete) {
-        ctx.drawImage(img,
-          centerX - characterSize * scale / 2,
-          centerY - characterSize * scale / 2,
-          characterSize * scale,
-          characterSize * scale);
-      }
-      ctx.restore();
-    } else {
-      const overlayAlpha = (t - 0.6) / 0.2;
-      ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(overlayAlpha * 0.3, 0.3)})`;
       ctx.fillRect(0, 0, w, h);
       const img = CharacterManager.images[this.evolution.newCharId];
       if (img && img.complete) {
@@ -224,14 +198,66 @@ const Effects = {
       const char = CHARACTERS[this.evolution.newCharId];
       if (char) {
         const iconBottom = centerY + characterSize / 2;
-        const textY = Math.min(iconBottom + 28, h - 90);
-        ctx.fillStyle = `rgba(0,0,0,${0.9 - overlayAlpha * 0.5})`;
+        const lineGap = 40;
+        const textY = Math.min(iconBottom + lineGap, h - 90);
+        ctx.fillStyle = `rgba(0,0,0,${textAlpha})`;
         ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('進化!', centerX, textY);
         ctx.font = 'bold 24px sans-serif';
         ctx.fillText(char.name + ' に進化した!', centerX, textY + 36);
       }
+    };
+
+    if (progress < fadeInDur) {
+      const t = progress / fadeInDur;
+      if (t < 0.2) {
+        const a = t / 0.2;
+        ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;
+        ctx.fillRect(0, 0, w, h);
+      } else if (t < 0.4) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillRect(0, 0, w, h);
+        const fadeOut = (t - 0.2) / 0.2;
+        const pulse = 1 + Math.sin(t * 50) * 0.08;
+        ctx.save();
+        ctx.globalAlpha = 1 - fadeOut;
+        const img = CharacterManager.images[this.evolution.oldCharId];
+        if (img && img.complete) {
+          ctx.drawImage(img,
+            centerX - characterSize * pulse / 2,
+            centerY - characterSize * pulse / 2,
+            characterSize * pulse,
+            characterSize * pulse);
+        }
+        ctx.restore();
+      } else if (t < 0.6) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.fillRect(0, 0, w, h);
+        const fadeIn = (t - 0.4) / 0.2;
+        const scale = 0.3 + fadeIn * 0.7;
+        ctx.save();
+        ctx.globalAlpha = fadeIn;
+        const img = CharacterManager.images[this.evolution.newCharId];
+        if (img && img.complete) {
+          ctx.drawImage(img,
+            centerX - characterSize * scale / 2,
+            centerY - characterSize * scale / 2,
+            characterSize * scale,
+            characterSize * scale);
+        }
+        ctx.restore();
+      } else {
+        const textFadeIn = Math.min(1, (t - 0.6) / 0.2);
+        drawFinalState(textFadeIn);
+      }
+    } else if (progress < fadeStart) {
+      drawFinalState(0.9);
+    } else {
+      drawFinalState(0.9);
+      const fadeProgress = (progress - fadeStart) / fadeDur;
+      ctx.fillStyle = `rgba(255, 255, 255, ${fadeProgress * 0.95})`;
+      ctx.fillRect(0, 0, w, h);
     }
   },
 

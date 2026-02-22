@@ -3,6 +3,7 @@
   const ctx = canvas.getContext('2d');
   const homeScreen = document.getElementById('homeScreen');
   const completionScreen = document.getElementById('completionScreen');
+  const completionStats = document.getElementById('completionStats');
   const gameOverScreen = document.getElementById('gameOverScreen');
   const inGameHomeBtn = document.getElementById('inGameHomeBtn');
   const startBtn = document.getElementById('startBtn');
@@ -94,6 +95,10 @@
 
     if (Game.isCleared()) {
       gameState = 'COMPLETED';
+      if (completionStats) {
+        const diffName = Game.difficulty ? Game.difficulty.name : 'ふつう';
+        completionStats.textContent = `難易度: ${diffName}　スコア: ${Game.getScore()}　残りライフ: ${Math.floor(Game.life)}`;
+      }
       completionScreen.classList.remove('hidden');
       rafId = requestAnimationFrame(gameLoop);
       return;
@@ -129,7 +134,6 @@
         }
         if (evolutionInfo) {
           Game.evolutionCount++;
-          ItemManager.increaseSpeed();
           Effects.triggerEvolution(evolutionInfo.oldCharId, evolutionInfo.newCharId, () => {
             CharacterManager.evolveTo(evolutionInfo.newCharId);
           });

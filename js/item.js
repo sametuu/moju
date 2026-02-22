@@ -12,6 +12,8 @@ const ItemManager = {
     this.lastSpawn = 0;
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
     this.baseFallSpeed = diff.fallSpeed;
+    this.speedPerLevel = diff.speedPerLevel ?? 0.08;
+    this.maxFallSpeed = diff.maxFallSpeed ?? 6.5;
     this.fallSpeed = diff.fallSpeed;
     this.spawnInterval = window.DEBUG_MODE ? 300 : diff.spawnInterval;
     this.itemSize = diff.itemSize;
@@ -19,8 +21,12 @@ const ItemManager = {
     this.preloadImages();
   },
 
-  increaseSpeed() {
-    this.fallSpeed = Math.min(this.fallSpeed * 1.15, this.baseFallSpeed * 2.5);
+  updateFallSpeed() {
+    const level = Game.getLevel();
+    this.fallSpeed = Math.min(
+      this.baseFallSpeed + (level - 1) * this.speedPerLevel,
+      this.maxFallSpeed
+    );
   },
 
   preloadImages() {
@@ -60,6 +66,7 @@ const ItemManager = {
   },
 
   update(dt) {
+    this.updateFallSpeed();
     const now = Date.now();
     if (now - this.lastSpawn > this.spawnInterval) {
       this.spawn();
