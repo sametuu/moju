@@ -222,12 +222,13 @@ const Effects = {
       }
       const char = CHARACTERS[this.evolution.newCharId];
       if (char) {
+        const textY = centerY + characterSize / 2 + 36;
         ctx.fillStyle = `rgba(0,0,0,${0.9 - overlayAlpha * 0.5})`;
         ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('進化!', centerX, h - 80);
+        ctx.fillText('進化!', centerX, textY);
         ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(char.name + ' に進化した!', centerX, h - 40);
+        ctx.fillText(char.name + ' に進化した!', centerX, textY + 36);
       }
     }
   },
