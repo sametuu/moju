@@ -134,3 +134,11 @@ html, body {
 .in-game-home-btn.hidden {
   display: none;
 }
+
+.version {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.25);
+}
