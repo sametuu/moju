@@ -241,6 +241,23 @@ const Effects = {
     ctx.restore();
   },
 
+  wrapText(ctx, text, maxWidth) {
+    const lines = [];
+    let line = '';
+    for (const char of text) {
+      const test = line + char;
+      const m = ctx.measureText(test);
+      if (m.width > maxWidth && line) {
+        lines.push(line);
+        line = char;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  },
+
   drawEvolution(ctx, characterX, characterY, characterSize) {
     if (!this.evolution.active) return;
     const progress = this.evolution.progress;
@@ -276,7 +293,13 @@ const Effects = {
         ctx.font = 'bold 18px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText('おめでとう！', centerX, textY);
-        ctx.fillText(`${oldChar.name} は ${newChar.name} に進化した！`, centerX, textY + 32);
+        const evoText = `${oldChar.name} は ${newChar.name} に進化した！`;
+        const maxTextWidth = Math.min(w - 48, 280);
+        const evoLines = this.wrapText(ctx, evoText, maxTextWidth);
+        const lineHeight = 26;
+        evoLines.forEach((line, i) => {
+          ctx.fillText(line, centerX, textY + 32 + i * lineHeight);
+        });
       }
     };
 

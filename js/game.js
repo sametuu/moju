@@ -17,7 +17,7 @@ const Game = {
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
     this.difficulty = diff;
     this.levelThreshold = typeof LEVEL_THRESHOLD !== 'undefined' ? LEVEL_THRESHOLD : 100;
-    this.maxLevel = diff.maxLevel ?? MAX_LEVEL;
+    this.maxLevel = diff.maxLevel;
   },
 
   damageLife(amount) {

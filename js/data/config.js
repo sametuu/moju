@@ -1,9 +1,6 @@
 // ゲーム設定ファイル
 
-// クリア条件: このレベルに達するとクリア（pc_master到達はLv55）
-const MAX_LEVEL = 55;
-
-// レベル計算用（難易度に依存しない。進化の順番・必要レベルは全難易度で同一）
+// レベル計算用（難易度に依存しない。スコア100点で1レベル、進化の順番・必要レベルは全難易度で同一）
 const LEVEL_THRESHOLD = 100;
 
 // キャラクター進化設定（moju→moju_nasi→moju_furo→moju_valentain固定、最後はpc_master）
@@ -39,7 +36,7 @@ const EVOLUTIONS = {
 const DIFFICULTIES = {
   easy: {
     name: 'かんたん',
-    maxLevel: 29,
+    maxLevel: 30,
     spawnInterval: 1200,
     itemRates: {
       initial: { plus: 0.80, damage: 0.17, heal: 0.03 },
@@ -69,11 +66,11 @@ const DIFFICULTIES = {
   },
   hard: {
     name: 'むずかしい',
-    maxLevel: 55,
+    maxLevel: 60,
     spawnInterval: 400,
     itemRates: {
-      initial: { plus: 0.80, damage: 0.195, heal: 0.005 },
-      final: { plus: 0.50, damage: 0.495, heal: 0.005 },
+      initial: { plus: 0.80, damage: 0.195, heal: 0.01 },
+      final: { plus: 0.50, damage: 0.495, heal: 0.01 },
       finalLevel: 60
     },
     fallSpeed: 4.5,

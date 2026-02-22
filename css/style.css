@@ -52,8 +52,17 @@ html, body {
 .subtitle {
   font-size: clamp(12px, 4vw, 18px);
   color: #555;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.explanation {
+  font-size: clamp(11px, 3.5vw, 15px);
+  color: #666;
   margin-bottom: 24px;
   text-align: center;
+  line-height: 1.6;
+  max-width: 320px;
 }
 
 .difficulty {
