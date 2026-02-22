@@ -66,8 +66,8 @@ const DIFFICULTIES = {
     name: 'むずかしい',
     spawnInterval: 400,
     itemRates: {
-      initial: { plus: 0.80, damage: 0.19, heal: 0.01 },
-      final: { plus: 0.50, damage: 0.49, heal: 0.01 },
+      initial: { plus: 0.80, damage: 0.195, heal: 0.005 },
+      final: { plus: 0.50, damage: 0.495, heal: 0.005 },
       finalLevel: 60
     },
     fallSpeed: 4.5,

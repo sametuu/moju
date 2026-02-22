@@ -71,7 +71,13 @@ const ItemManager = {
       const fallback = ITEMS.find(i => (i.unlockLevel ?? 1) <= level);
       return fallback ? { ...fallback } : { ...ITEMS[0] };
     }
-    return { ...pool[Math.floor(Math.random() * pool.length)] };
+    const totalWeight = pool.reduce((s, i) => s + (i.weight || 1), 0);
+    let r = Math.random() * totalWeight;
+    for (const item of pool) {
+      r -= item.weight || 1;
+      if (r <= 0) return { ...item };
+    }
+    return { ...pool[pool.length - 1] };
   },
 
   spawn() {
