@@ -212,10 +212,22 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    if (startBtn) startBtn.addEventListener('click', startGame);
-    if (homeBtn) homeBtn.addEventListener('click', goHome);
-    if (retryBtn) retryBtn.addEventListener('click', goHome);
-    if (inGameHomeBtn) inGameHomeBtn.addEventListener('click', goHome);
+    function addTapHandler(el, handler) {
+      if (!el) return;
+      let lastTouch = 0;
+      el.addEventListener('click', (e) => {
+        if (Date.now() - lastTouch < 400) return;
+        handler();
+      });
+      el.addEventListener('touchend', (e) => {
+        lastTouch = Date.now();
+        handler();
+      }, { passive: true });
+    }
+    addTapHandler(startBtn, startGame);
+    addTapHandler(homeBtn, goHome);
+    addTapHandler(retryBtn, goHome);
+    addTapHandler(inGameHomeBtn, goHome);
 
     try {
       await CharacterManager.init();
