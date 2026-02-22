@@ -161,6 +161,15 @@
       return;
     }
 
+    if (gameState === 'GAME_OVER_TRANSITION') {
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(0, 0, w, h);
+      Effects.update(dtMs);
+      Effects.drawGameOverResult(ctx);
+      rafId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
     if (gameState === 'PAUSED') {
       ItemManager.draw(ctx);
       CharacterManager.draw(ctx);
@@ -175,7 +184,7 @@
     }
 
     if (Game.isGameOver()) {
-      gameState = 'GAME_OVER';
+      gameState = 'GAME_OVER_TRANSITION';
       const diffKey = Game.difficultyKey || 'normal';
       const score = Game.getScore();
       const level = Game.getLevel();
@@ -187,7 +196,12 @@
         if (high.score > 0 || high.level > 1) text += `　最高: Lv.${high.level} ${high.score}` + (isNewRecord ? '（NEW!）' : '');
         gameOverStats.textContent = text;
       }
-      gameOverScreen.classList.remove('hidden');
+      quitGameBtn.classList.add('hidden');
+      pauseBtn?.classList.add('hidden');
+      Effects.triggerGameOverResult(score, level, isNewRecord, () => {
+        gameOverScreen.classList.remove('hidden');
+        gameState = 'GAME_OVER';
+      });
       rafId = requestAnimationFrame(gameLoop);
       return;
     }
@@ -333,6 +347,7 @@
       Effects.evolution.active = false;
       Effects.completion.active = false;
       Effects.quitResult.active = false;
+      Effects.gameOverResult.active = false;
 
       if (homeScreen) {
         homeScreen.classList.add('hidden');
