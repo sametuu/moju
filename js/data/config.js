@@ -43,6 +43,21 @@ const EVOLUTIONS = {
   pc_master: []
 };
 
+// 進化順（レベル順）のキャラクターIDリスト（ギャラリー表示用）
+function getGalleryOrder() {
+  const order = [];
+  let current = 'moju';
+  let level = 1;
+  while (current) {
+    order.push({ id: current, level });
+    const evo = EVOLUTIONS[current];
+    const next = evo && evo[0] ? evo[0].characterId : null;
+    if (next && evo && evo[0]) level = evo[0].level;
+    current = next;
+  }
+  return order;
+}
+
 // 難易度設定
 // maxLevel: この難易度で到達可能な最大レベル（進化チェーン・必要レベルは共通、難しいほど後ろのキャラに到達可能）
 //   easy Lv30→2024cat_e / normal Lv60→iyadosu / hard Lv105→pc_master

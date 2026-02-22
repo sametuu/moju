@@ -1,5 +1,35 @@
 (function() {
   const STORAGE_KEY = 'moju_highscores';
+  const GALLERY_KEY = 'moju_gallery';
+
+  const Gallery = {
+    load() {
+      try {
+        const raw = localStorage.getItem(GALLERY_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch {
+        return [];
+      }
+    },
+    save(ids) {
+      try {
+        localStorage.setItem(GALLERY_KEY, JSON.stringify(ids));
+      } catch (e) {
+        console.warn('Gallery save failed:', e);
+      }
+    },
+    add(characterId) {
+      const ids = this.load();
+      if (!ids.includes(characterId)) {
+        ids.push(characterId);
+        this.save(ids);
+      }
+    },
+    has(characterId) {
+      return this.load().includes(characterId);
+    }
+  };
+
   const HighScore = {
     load() {
       try {
@@ -48,6 +78,9 @@
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
   const homeScreen = document.getElementById('homeScreen');
+  const galleryScreen = document.getElementById('galleryScreen');
+  const galleryGrid = document.getElementById('galleryGrid');
+  const galleryStats = document.getElementById('galleryStats');
   const completionScreen = document.getElementById('completionScreen');
   const completionStats = document.getElementById('completionStats');
   const gameOverScreen = document.getElementById('gameOverScreen');
@@ -64,6 +97,63 @@
   let lastTime = 0;
   let rafId = null;
   let gameState = 'HOME';
+
+  function renderGallery() {
+    console.log('[Gallery] renderGallery called');
+    if (!galleryGrid || !galleryStats) return;
+    const order = typeof getGalleryOrder === 'function' ? getGalleryOrder() : [];
+    const acquired = Gallery.load();
+    const total = order.length;
+    const count = acquired.length;
+    const unknown = total - count;
+
+    galleryStats.textContent = `${count} / ${total} 獲得　残り ${unknown} 体`;
+    galleryGrid.innerHTML = '';
+
+    for (const { id, level } of order) {
+      const card = document.createElement('div');
+      card.className = 'gallery-card' + (acquired.includes(id) ? '' : ' unknown');
+      const char = CHARACTERS[id];
+      if (acquired.includes(id) && char) {
+        const img = document.createElement('img');
+        img.src = char.image;
+        img.alt = char.name;
+        img.loading = 'lazy';
+        card.appendChild(img);
+        const nameEl = document.createElement('div');
+        nameEl.className = 'gallery-card-name';
+        nameEl.textContent = `Lv.${level} ${char.name}`;
+        card.appendChild(nameEl);
+      } else {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'gallery-card-placeholder';
+        placeholder.textContent = '???';
+        card.appendChild(placeholder);
+        const nameEl = document.createElement('div');
+        nameEl.className = 'gallery-card-name';
+        nameEl.textContent = `Lv.${level}`;
+        card.appendChild(nameEl);
+      }
+      galleryGrid.appendChild(card);
+    }
+  }
+
+  function openGallery() {
+    homeScreen.classList.add('hidden');
+    homeScreen.style.display = 'none';
+    renderGallery();
+    galleryScreen.classList.remove('hidden');
+    galleryScreen.style.display = 'flex';
+    gameState = 'GALLERY';
+  }
+
+  function closeGallery() {
+    galleryScreen.classList.add('hidden');
+    galleryScreen.style.display = 'none';
+    homeScreen.classList.remove('hidden');
+    homeScreen.style.display = 'flex';
+    gameState = 'HOME';
+  }
 
   function updateHighScoreDisplay() {
     if (!highScoreDisplay) return;
@@ -276,6 +366,7 @@
         }
         if (evolutionInfo) {
           Game.evolutionCount++;
+          Gallery.add(evolutionInfo.newCharId);
           Effects.triggerEvolution(evolutionInfo.oldCharId, evolutionInfo.newCharId, () => {
             CharacterManager.evolveTo(evolutionInfo.newCharId);
           });
@@ -338,6 +429,7 @@
       Game.init(difficulty);
       ItemManager.init(difficulty);
       CharacterManager.characterId = DEFAULT_CHARACTER_ID;
+      Gallery.add(DEFAULT_CHARACTER_ID);
       CharacterManager.x = window.innerWidth / 2 - CharacterManager.size / 2;
       CharacterManager.y = window.innerHeight / 2 - CharacterManager.size / 2;
       CharacterManager.targetX = CharacterManager.x;
@@ -401,6 +493,7 @@
   function goHome() {
     completionScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+    galleryScreen?.classList.add('hidden');
     pauseScreen.classList.add('hidden');
     quitGameBtn.classList.add('hidden');
     quitGameBtn.style.display = 'none';
@@ -449,6 +542,25 @@
       }, { passive: true });
     }
     addTapHandler(startBtn, startGame);
+    const galleryBtn = document.getElementById('galleryBtn');
+    const galleryBackBtn = document.getElementById('galleryBackBtn');
+    addTapHandler(galleryBtn, openGallery);
+    if (galleryBackBtn) {
+      console.log('[Gallery] galleryBackBtn found, attaching handlers');
+      galleryBackBtn.addEventListener('pointerdown', (e) => {
+        console.log('[Gallery] pointerdown on galleryBackBtn');
+        e.preventDefault();
+        e.stopPropagation();
+        closeGallery();
+      }, { passive: false });
+      galleryBackBtn.addEventListener('click', (e) => {
+        console.log('[Gallery] click on galleryBackBtn');
+        e.preventDefault();
+        closeGallery();
+      });
+    } else {
+      console.warn('[Gallery] galleryBackBtn not found');
+    }
     addTapHandler(homeBtn, goHome);
     addTapHandler(retryBtn, goHome);
     addTapHandler(quitGameBtn, quitGame);

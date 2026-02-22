@@ -621,10 +621,10 @@ const Effects = {
 
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = '#c00';
+    ctx.fillStyle = '#0ea5e9';
     ctx.font = 'bold 24px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('ゲームオーバー', cx, cy - 60);
+    ctx.fillText('おつかれさま！', cx, cy - 60);
     ctx.fillStyle = '#333';
     ctx.font = '18px sans-serif';
     ctx.fillText(`今のスコアは ${score} でした`, cx, cy - 20);

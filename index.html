@@ -30,7 +30,15 @@
       <span>倍</span>
     </div>
     <button id="startBtn" class="btn">冒険に出発！</button>
-    <span class="version">v0.1.4</span>
+    <button id="galleryBtn" class="btn btn-secondary">ギャラリー</button>
+    <span class="version">v0.1.5</span>
+  </div>
+
+  <div id="galleryScreen" class="overlay hidden">
+    <h2 class="gallery-title">ギャラリー</h2>
+    <p id="galleryStats" class="gallery-stats"></p>
+    <div id="galleryGrid" class="gallery-grid"></div>
+    <button id="galleryBackBtn" class="btn" type="button">ホームに戻る</button>
   </div>
 
   <div id="completionScreen" class="overlay hidden">
@@ -48,8 +56,8 @@
   </div>
 
   <div id="gameOverScreen" class="overlay hidden">
-    <h2 class="gameover-title">ゲームオーバー</h2>
-    <p class="gameover-sub">ライフがゼロになりました</p>
+    <h2 class="gameover-title">おつかれさま！</h2>
+    <p class="gameover-sub">もう一度挑戦しよう！</p>
     <p id="gameOverStats" class="gameover-stats"></p>
     <button id="retryBtn" class="btn">ホームに戻る</button>
   </div>
