@@ -51,12 +51,12 @@ const DIFFICULTIES = {
   },
   normal: {
     name: 'ふつう',
-    maxLevel: 45,
+    maxLevel: 60,
     spawnInterval: 600,
     itemRates: {
       initial: { plus: 0.80, damage: 0.18, heal: 0.02 },
       final: { plus: 0.60, damage: 0.38, heal: 0.02 },
-      finalLevel: 40
+      finalLevel: 60
     },
     fallSpeed: 3.5,
     speedPerLevel: 0.08,
