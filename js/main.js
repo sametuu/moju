@@ -51,7 +51,7 @@
   const completionStats = document.getElementById('completionStats');
   const gameOverScreen = document.getElementById('gameOverScreen');
   const gameOverStats = document.getElementById('gameOverStats');
-  const inGameHomeBtn = document.getElementById('inGameHomeBtn');
+  const quitGameBtn = document.getElementById('quitGameBtn');
   const startBtn = document.getElementById('startBtn');
   const homeBtn = document.getElementById('homeBtn');
   const retryBtn = document.getElementById('retryBtn');
@@ -67,9 +67,9 @@
     const names = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい' };
     const lines = ['easy', 'normal', 'hard'].map(k => {
       const h = data[k] ?? { score: 0, level: 1 };
-      return `${names[k]}: Lv.${h.level} ${h.score}`;
+      return `${names[k]}: Lv.${h.level}　スコア${h.score}`;
     });
-    highScoreDisplay.textContent = '最高記録　' + lines.join('　');
+    highScoreDisplay.textContent = '最高記録\n' + lines.join('\n');
   }
 
   function resizeCanvas() {
@@ -129,19 +129,30 @@
   }
 
   function gameLoop(timestamp) {
+    try {
     const dtMs = Math.min(timestamp - lastTime, 50);
     lastTime = timestamp;
 
     const w = window.innerWidth;
     const h = window.innerHeight;
-    ctx.clearRect(0, 0, w, h);
-
-    ctx.fillStyle = '#87ceeb';
-    ctx.fillRect(0, 0, w, h);
+    if (ctx) {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(0, 0, w, h);
+    }
 
     if (gameState === 'COMPLETING') {
       Effects.update(dtMs);
       Effects.drawCompletion(ctx);
+      rafId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
+    if (gameState === 'QUIT_RESULTS') {
+      ctx.fillStyle = '#87ceeb';
+      ctx.fillRect(0, 0, w, h);
+      Effects.update(dtMs);
+      Effects.drawQuitResult(ctx);
       rafId = requestAnimationFrame(gameLoop);
       return;
     }
@@ -285,39 +296,67 @@
       ctx.fillText('DEBUG', w - 10, h - 10);
     }
 
+    } catch (e) {
+      console.error('gameLoop error:', e);
+    }
     rafId = requestAnimationFrame(gameLoop);
   }
 
   function startGame() {
-    const difficulty = difficultySelect.value;
-    if (window.DEBUG_MODE) {
-      const el = document.getElementById('spawnMultiplier');
-      window.DEBUG_SPAWN_MULTIPLIER = Math.max(1, parseFloat(el?.value) || 5);
-    }
-    Game.init(difficulty);
-    ItemManager.init(difficulty);
-    CharacterManager.characterId = DEFAULT_CHARACTER_ID;
-    CharacterManager.x = window.innerWidth / 2 - CharacterManager.size / 2;
-    CharacterManager.y = window.innerHeight / 2 - CharacterManager.size / 2;
-    CharacterManager.targetX = CharacterManager.x;
-    CharacterManager.targetY = CharacterManager.y;
-    Effects.flash.active = false;
-    Effects.levelUp.active = false;
-    Effects.evolution.active = false;
-    Effects.completion.active = false;
+    try {
+      const difficulty = difficultySelect?.value || 'normal';
+      if (window.DEBUG_MODE) {
+        const el = document.getElementById('spawnMultiplier');
+        window.DEBUG_SPAWN_MULTIPLIER = Math.max(1, parseFloat(el?.value) || 5);
+      }
+      Game.init(difficulty);
+      ItemManager.init(difficulty);
+      CharacterManager.characterId = DEFAULT_CHARACTER_ID;
+      CharacterManager.x = window.innerWidth / 2 - CharacterManager.size / 2;
+      CharacterManager.y = window.innerHeight / 2 - CharacterManager.size / 2;
+      CharacterManager.targetX = CharacterManager.x;
+      CharacterManager.targetY = CharacterManager.y;
+      Effects.flash.active = false;
+      Effects.levelUp.active = false;
+      Effects.evolution.active = false;
+      Effects.completion.active = false;
+      Effects.quitResult.active = false;
 
-    homeScreen.classList.add('hidden');
-    homeScreen.style.display = 'none';
-    inGameHomeBtn.classList.remove('hidden');
-    inGameHomeBtn.style.display = 'block';
-    gameState = 'PLAYING';
+      if (homeScreen) {
+        homeScreen.classList.add('hidden');
+        homeScreen.style.display = 'none';
+      } else {
+        console.error('startGame: homeScreen is null');
+      }
+      if (quitGameBtn) {
+        quitGameBtn.classList.remove('hidden');
+        quitGameBtn.style.display = 'block';
+      } else {
+        console.error('startGame: quitGameBtn is null');
+      }
+      gameState = 'PLAYING';
+    } catch (e) {
+      console.error('startGame error:', e);
+    }
+  }
+
+  function quitGame() {
+    if (gameState === 'PLAYING') {
+      const diffKey = Game.difficultyKey || 'normal';
+      const score = Game.getScore();
+      const level = Game.getLevel();
+      const isNewRecord = HighScore.update(diffKey, score, level);
+      gameState = 'QUIT_RESULTS';
+      quitGameBtn.classList.add('hidden');
+      Effects.triggerQuitResult(score, level, isNewRecord, goHome);
+    }
   }
 
   function goHome() {
     completionScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
-    inGameHomeBtn.classList.add('hidden');
-    inGameHomeBtn.style.display = 'none';
+    quitGameBtn.classList.add('hidden');
+    quitGameBtn.style.display = 'none';
     homeScreen.classList.remove('hidden');
     homeScreen.style.display = 'flex';
     gameState = 'HOME';
@@ -325,25 +364,43 @@
   }
 
   async function init() {
+    try {
+    if (!canvas || !ctx) {
+      console.error('init: canvas or ctx is null');
+    }
+    if (!startBtn) console.error('init: startBtn is null');
+    if (!quitGameBtn) console.error('init: quitGameBtn is null');
+    if (!homeScreen) console.error('init: homeScreen is null');
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
     function addTapHandler(el, handler) {
-      if (!el) return;
+      if (!el) {
+        console.warn('addTapHandler: element is null');
+        return;
+      }
       let lastTouch = 0;
+      const safeHandler = () => {
+        try {
+          handler();
+        } catch (e) {
+          console.error('addTapHandler handler error:', e);
+        }
+      };
       el.addEventListener('click', (e) => {
         if (Date.now() - lastTouch < 400) return;
-        handler();
+        safeHandler();
       });
       el.addEventListener('touchend', (e) => {
         lastTouch = Date.now();
-        handler();
+        safeHandler();
       }, { passive: true });
     }
     addTapHandler(startBtn, startGame);
     addTapHandler(homeBtn, goHome);
     addTapHandler(retryBtn, goHome);
-    addTapHandler(inGameHomeBtn, goHome);
+    addTapHandler(quitGameBtn, quitGame);
 
     try {
       await CharacterManager.init();
@@ -366,7 +423,10 @@
 
     lastTime = performance.now();
     rafId = requestAnimationFrame(gameLoop);
+    } catch (e) {
+      console.error('init error:', e);
+    }
   }
 
-  init();
+  init().catch(e => console.error('init failed:', e));
 })();

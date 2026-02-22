@@ -20,6 +20,15 @@ const Effects = {
     confetti: [],
     onComplete: null
   },
+  quitResult: {
+    active: false,
+    progress: 0,
+    duration: 2800,
+    score: 0,
+    level: 1,
+    isNewRecord: false,
+    onComplete: null
+  },
 
   triggerFlash(positive, centerX, centerY) {
     const cx = centerX ?? window.innerWidth / 2;
@@ -100,6 +109,18 @@ const Effects = {
       fadeOutDuration: 500,
       oldCharId,
       newCharId,
+      onComplete
+    };
+  },
+
+  triggerQuitResult(score, level, isNewRecord, onComplete) {
+    this.quitResult = {
+      active: true,
+      progress: 0,
+      duration: 2800,
+      score,
+      level,
+      isNewRecord,
       onComplete
     };
   },
@@ -194,6 +215,14 @@ const Effects = {
       if (this.completion.progress >= this.completion.duration) {
         this.completion.active = false;
         if (this.completion.onComplete) this.completion.onComplete();
+      }
+    }
+
+    if (this.quitResult.active) {
+      this.quitResult.progress += dtMs;
+      if (this.quitResult.progress >= this.quitResult.duration) {
+        this.quitResult.active = false;
+        if (this.quitResult.onComplete) this.quitResult.onComplete();
       }
     }
   },
@@ -485,5 +514,59 @@ const Effects = {
 
   isCompletionActive() {
     return this.completion.active;
+  },
+
+  drawQuitResult(ctx) {
+    if (!this.quitResult.active) return;
+    const progress = this.quitResult.progress;
+    const duration = this.quitResult.duration;
+    const { score, level, isNewRecord } = this.quitResult;
+    const dpr = window.devicePixelRatio || 1;
+    const w = ctx.canvas.width / dpr;
+    const h = ctx.canvas.height / dpr;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    const fadeInDur = 400;
+    const holdDur = 2000;
+    const fadeOutDur = 400;
+    let alpha = 1;
+    if (progress < fadeInDur) {
+      alpha = progress / fadeInDur;
+    } else if (progress > holdDur + fadeInDur) {
+      alpha = Math.max(0, 1 - (progress - holdDur - fadeInDur) / fadeOutDur);
+    }
+
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.95 * alpha})`;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 22px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('おつかれさま！', cx, cy - 60);
+    ctx.font = '18px sans-serif';
+    ctx.fillText(`今のスコアは ${score} でした`, cx, cy - 20);
+    ctx.fillText(`レベルは ${level} でした`, cx, cy + 10);
+
+    if (isNewRecord) {
+      const pulse = 1 + Math.sin(progress * 0.015) * 0.08;
+      ctx.save();
+      ctx.translate(cx, cy + 50);
+      ctx.scale(pulse, pulse);
+      ctx.fillStyle = '#ffd700';
+      ctx.strokeStyle = '#b8860b';
+      ctx.lineWidth = 4;
+      ctx.font = 'bold 28px sans-serif';
+      ctx.strokeText('新記録！', 0, 0);
+      ctx.fillText('新記録！', 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
+  },
+
+  isQuitResultActive() {
+    return this.quitResult.active;
   }
 };
