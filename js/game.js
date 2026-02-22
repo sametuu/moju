@@ -23,6 +23,11 @@ const Game = {
     this.life = Math.max(0, this.life - amount);
   },
 
+  healLife(ratio) {
+    const heal = this.maxLife * ratio;
+    this.life = Math.min(this.maxLife, this.life + heal);
+  },
+
   getLifeDamage(item) {
     if (!item || item.score >= 0) return 0;
     const base = (100 / (this.difficulty.hitsToDie || 10)) || 10;

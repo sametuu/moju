@@ -11,11 +11,12 @@ const ItemManager = {
     this.items = [];
     this.lastSpawn = 0;
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
+    this.healChance = diff.healChance ?? 0.02;
     this.baseFallSpeed = diff.fallSpeed;
     this.speedPerLevel = diff.speedPerLevel ?? 0.08;
     this.maxFallSpeed = diff.maxFallSpeed ?? 6.5;
     this.fallSpeed = diff.fallSpeed;
-    this.spawnInterval = window.DEBUG_MODE ? 300 : diff.spawnInterval;
+    this.spawnInterval = diff.spawnInterval;
     this.itemSize = diff.itemSize;
     this.totalWeight = ITEMS.reduce((sum, item) => sum + item.weight, 0);
     this.preloadImages();
@@ -43,8 +44,7 @@ const ItemManager = {
 
   getRandomItem() {
     const level = Game.getLevel();
-    const pool = (window.DEBUG_MODE ? ITEMS.filter(i => i.score > 0) : ITEMS)
-      .filter(i => (i.unlockLevel ?? 1) <= level);
+    const pool = ITEMS.filter(i => (i.unlockLevel ?? 1) <= level && !i.lifeHeal);
     if (pool.length === 0) return { ...ITEMS[0] };
     const total = pool.reduce((s, i) => s + i.weight, 0);
     let r = Math.random() * total;
@@ -55,8 +55,15 @@ const ItemManager = {
     return { ...pool[0] };
   },
 
+  getRandomHealingItem() {
+    const healItems = ITEMS.filter(i => i.lifeHeal && (i.unlockLevel ?? 1) <= Game.getLevel());
+    if (healItems.length === 0) return this.getRandomItem();
+    return { ...healItems[Math.floor(Math.random() * healItems.length)] };
+  },
+
   spawn() {
-    const item = this.getRandomItem();
+    const isHeal = Math.random() < this.healChance;
+    const item = isHeal ? this.getRandomHealingItem() : this.getRandomItem();
     const x = window.DEBUG_MODE
       ? window.innerWidth / 2
       : Math.random() * (window.innerWidth - this.itemSize) + this.itemSize / 2;

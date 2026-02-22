@@ -1,6 +1,7 @@
 const Effects = {
   flash: { active: false, type: null, progress: 0, duration: 350, sparkles: [] },
   levelUp: { active: false, progress: 0, duration: 1200, particles: [] },
+  lifeHeal: { active: false, progress: 0, duration: 1800, particles: [] },
   evolution: {
     active: false,
     progress: 0,
@@ -37,6 +38,30 @@ const Effects = {
       progress: 0,
       duration: 1200,
       particles: this.createLevelUpParticles(CharacterManager.x, CharacterManager.y)
+    };
+  },
+
+  triggerLifeHeal(centerX, centerY, message) {
+    const cx = centerX ?? window.innerWidth / 2;
+    const cy = centerY ?? window.innerHeight / 2;
+    const particles = [];
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: cx + (Math.random() - 0.5) * 80,
+        y: cy,
+        vx: (Math.random() - 0.5) * 10,
+        vy: -Math.random() * 8 - 5,
+        size: Math.random() * 10 + 5,
+        alpha: 1,
+        color: ['#4ade80', '#22c55e', '#86efac', '#bbf7d0'][Math.floor(Math.random() * 4)]
+      });
+    }
+    this.lifeHeal = {
+      active: true,
+      progress: 0,
+      duration: 1800,
+      particles,
+      message: message || 'ライフ回復！'
     };
   },
 
@@ -91,6 +116,20 @@ const Effects = {
       }
       if (this.levelUp.progress >= this.levelUp.duration) {
         this.levelUp.active = false;
+      }
+    }
+
+    if (this.lifeHeal.active) {
+      this.lifeHeal.progress += dtMs;
+      const frameFactor = dtMs / 16;
+      for (const p of this.lifeHeal.particles) {
+        p.x += p.vx * frameFactor;
+        p.y += p.vy * frameFactor;
+        p.vy += 0.3 * frameFactor;
+        p.alpha = Math.max(0, 1 - this.lifeHeal.progress / this.lifeHeal.duration);
+      }
+      if (this.lifeHeal.progress >= this.lifeHeal.duration) {
+        this.lifeHeal.active = false;
       }
     }
 
@@ -167,6 +206,38 @@ const Effects = {
     ctx.textAlign = 'center';
     ctx.strokeText('LEVEL UP!', window.innerWidth / 2, window.innerHeight / 2 - 20);
     ctx.fillText('LEVEL UP!', window.innerWidth / 2, window.innerHeight / 2 - 20);
+    ctx.restore();
+  },
+
+  drawLifeHeal(ctx) {
+    if (!this.lifeHeal.active) return;
+    const t = this.lifeHeal.progress / this.lifeHeal.duration;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    for (const p of this.lifeHeal.particles) {
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    const textAlpha = t < 0.2 ? t / 0.2 : (t > 0.7 ? (1 - t) / 0.3 : 1);
+    ctx.save();
+    ctx.globalAlpha = textAlpha;
+    ctx.fillStyle = '#22c55e';
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 5;
+    ctx.font = 'bold 28px sans-serif';
+    ctx.textAlign = 'center';
+    const msg = this.lifeHeal.message || 'ライフ回復！';
+    ctx.strokeText(msg, cx, cy - 30);
+    ctx.fillText(msg, cx, cy - 30);
     ctx.restore();
   },
 

@@ -21,6 +21,7 @@ const EVOLUTIONS = {
 
 // 難易度設定
 // hitsToDie: 悪いアイテムに何回当たるとゲームオーバーか
+// healChance: 回復アイテムの出現確率（0.03=3%, 0.02=2%, 0.01=1%）
 // 落下速度（configで調整可能）:
 //   fallSpeed: レベル1の落下速度
 //   speedPerLevel: レベルが1上がるごとの増加量
@@ -29,6 +30,7 @@ const DIFFICULTIES = {
   easy: {
     name: 'かんたん',
     spawnInterval: 1200,
+    healChance: 0.03,
     fallSpeed: 2.2,
     speedPerLevel: 0.04,
     maxFallSpeed: 4.0,
@@ -39,6 +41,7 @@ const DIFFICULTIES = {
   normal: {
     name: 'ふつう',
     spawnInterval: 600,
+    healChance: 0.02,
     fallSpeed: 3.5,
     speedPerLevel: 0.08,
     maxFallSpeed: 6.5,
@@ -49,6 +52,7 @@ const DIFFICULTIES = {
   hard: {
     name: 'むずかしい',
     spawnInterval: 400,
+    healChance: 0.01,
     fallSpeed: 4.5,
     speedPerLevel: 0.12,
     maxFallSpeed: 9.0,

@@ -121,12 +121,18 @@
       let maxNewLevel = 0;
       let evolutionInfo = null;
       ItemManager.checkCollisions(CharacterManager.getBounds(), (item) => {
-        Effects.triggerFlash(item.score > 0, item.x, item.y);
-        if (item.score < 0) {
-          const dmg = Game.getLifeDamage(item);
-          Game.damageLife(dmg);
+        if (item.lifeHeal) {
+          Game.healLife(item.lifeHeal);
+          const healMsg = item.lifeHeal >= 1 ? 'おー！ライフ全回復！' : 'ライフ回復！';
+          Effects.triggerLifeHeal(item.x, item.y, healMsg);
+        } else {
+          Effects.triggerFlash(item.score > 0, item.x, item.y);
+          if (item.score < 0 && !window.DEBUG_MODE) {
+            const dmg = Game.getLifeDamage(item);
+            Game.damageLife(dmg);
+          }
         }
-        const levelUp = Game.addScore(item.score);
+        const levelUp = Game.addScore(item.score || 0);
         if (levelUp > maxNewLevel) maxNewLevel = levelUp;
       });
       if (maxNewLevel > 0) {
@@ -151,6 +157,7 @@
     Effects.update(dtMs);
     Effects.drawFlash(ctx);
     Effects.drawLevelUp(ctx);
+    Effects.drawLifeHeal(ctx);
 
     ctx.fillStyle = 'rgba(0,0,0,0.75)';
     ctx.fillRect(0, 0, 220, 82);
@@ -245,17 +252,7 @@
     }
 
     if (window.DEBUG_MODE) {
-      homeScreen.classList.add('hidden');
-      inGameHomeBtn.classList.remove('hidden');
-      gameState = 'PLAYING';
-      const difficulty = difficultySelect.value;
-      Game.init(difficulty);
-      ItemManager.init(difficulty);
-      CharacterManager.characterId = DEFAULT_CHARACTER_ID;
-      CharacterManager.x = window.innerWidth / 2 - CharacterManager.size / 2;
-      CharacterManager.y = window.innerHeight / 2 - CharacterManager.size / 2;
-      CharacterManager.targetX = CharacterManager.x;
-      CharacterManager.targetY = CharacterManager.y;
+      homeScreen.classList.remove('hidden');
     }
 
     canvas.addEventListener('mousedown', handlePointerDown);

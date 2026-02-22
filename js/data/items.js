@@ -49,10 +49,13 @@ const ITEMS = [
   { id: 'laptop', name: 'ノートPC', score: -22, weight: 1, color: '#2f4f4f', emoji: '1f4bb', lifeDamage: 1.3, unlockLevel: 20 },
   { id: 'camera', name: 'カメラ', score: -16, weight: 1, color: '#696969', emoji: '1f4f8', lifeDamage: 1.0, unlockLevel: 30 },
   { id: 'videocam', name: 'ビデオ', score: -19, weight: 1, color: '#708090', emoji: '1f4f9', lifeDamage: 1.1, unlockLevel: 30 },
-  { id: 'satellite', name: '衛星', score: -25, weight: 1, color: '#4a4a4a', emoji: '1f4e1', lifeDamage: 1.4, unlockLevel: 40 },
+  { id: 'satellite', name: '衛星', score: -25, weight: 3, color: '#4a4a4a', emoji: '1f4e1', lifeDamage: 1.4, unlockLevel: 40 },
   { id: 'brain', name: 'AI', score: -28, weight: 1, color: '#708090', emoji: '1f9e0', lifeDamage: 1.5, unlockLevel: 40 },
   { id: 'desktop', name: 'デスクトップ', score: -24, weight: 1, color: '#2f4f4f', emoji: '1f5a5', lifeDamage: 1.3, unlockLevel: 50 },
   { id: 'printer', name: 'プリンター', score: -17, weight: 1, color: '#696969', emoji: '1f5a8', lifeDamage: 1.0, unlockLevel: 50 },
   { id: 'battery', name: '電池切れ', score: -11, weight: 2, color: '#808080', emoji: '1f50b', lifeDamage: 0.8, unlockLevel: 50 },
-  { id: 'floppy', name: 'フロッピー', score: -13, weight: 1, color: '#4a4a4a', emoji: '1f4be', lifeDamage: 0.9, unlockLevel: 50 }
+  { id: 'floppy', name: 'フロッピー', score: -13, weight: 1, color: '#4a4a4a', emoji: '1f4be', lifeDamage: 0.9, unlockLevel: 50 },
+  // ライフ回復アイテム 2種（100回に1回、必ずどちらかが出現）
+  { id: 'medicine', name: 'くすり', score: 0, weight: 0, color: '#90ee90', emoji: '1f48a', lifeHeal: 0.3, unlockLevel: 1 },
+  { id: 'hospital', name: 'びょういん', score: 0, weight: 0, color: '#98fb98', emoji: '1f3e5', lifeHeal: 1.0, unlockLevel: 1 }
 ];
