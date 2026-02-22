@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>もじゅゲーム テスト</title>
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <div id="results"></div>
+
+  <script src="../js/data/characters.js"></script>
+  <script src="../js/data/items.js"></script>
+  <script src="../js/game.js"></script>
+  <script src="../js/character.js"></script>
+  <script src="../js/item.js"></script>
+  <script src="../js/effects.js"></script>
+  <script>
+    const results = document.getElementById('results');
+    let passed = 0;
+    let failed = 0;
+
+    function assert(condition, message) {
+      if (condition) {
+        passed++;
+        return true;
+      } else {
+        failed++;
+        results.innerHTML += `<div style="color:red">✗ ${message}</div>`;
+        return false;
+      }
+    }
+
+    function test(name, fn) {
+      const failedBefore = failed;
+      try {
+        fn();
+        if (failed === failedBefore) {
+          results.innerHTML += `<div style="color:green">✓ ${name}</div>`;
+        }
+      } catch (e) {
+        failed++;
+        results.innerHTML += `<div style="color:red">✗ ${name}: ${e.message}</div>`;
+      }
+    }
+
+    (async function runTests() {
+      results.innerHTML = '<h2>エフェクト単体テスト</h2>';
+
+      test('得点アイテム取得時にpositiveフラッシュが発動する', () => {
+        Effects.triggerFlash(true, 100, 100);
+        assert(Effects.flash.active === true, 'flash.active');
+        assert(Effects.flash.type === 'positive', 'flash.type');
+        assert(Effects.flash.sparkles.length === 12, 'sparkles count');
+      });
+
+      test('減点アイテム取得時にnegativeフラッシュが発動する', () => {
+        Effects.triggerFlash(false);
+        assert(Effects.flash.active === true, 'flash.active');
+        assert(Effects.flash.type === 'negative', 'flash.type');
+      });
+
+      test('レベルアップ時にlevelUpエフェクトが発動する', () => {
+        CharacterManager.x = 200;
+        CharacterManager.y = 300;
+        Effects.triggerLevelUp();
+        assert(Effects.levelUp.active === true, 'levelUp.active');
+        assert(Effects.levelUp.particles.length === 30, 'particles count');
+      });
+
+      test('進化時にevolutionエフェクトが発動する', () => {
+        Effects.triggerEvolution('moju', 'iyadosu', () => {});
+        assert(Effects.evolution.active === true, 'evolution.active');
+        assert(Effects.evolution.oldCharId === 'moju', 'oldCharId');
+        assert(Effects.evolution.newCharId === 'iyadosu', 'newCharId');
+      });
+
+      test('フラッシュはduration経過で非アクティブになる', () => {
+        Effects.triggerFlash(true);
+        assert(Effects.flash.active === true, 'initial active');
+        Effects.update(200);
+        assert(Effects.flash.active === true, 'still active at 200ms');
+        Effects.update(200);
+        assert(Effects.flash.active === false, 'inactive after duration');
+      });
+
+      test('進化完了時にonCompleteコールバックが呼ばれる', () => {
+        let called = false;
+        Effects.triggerEvolution('moju', 'iyadosu', () => { called = true; });
+        Effects.update(2500);
+        assert(called === true, 'onComplete called');
+      });
+
+      results.innerHTML += '<h2>ゲームフロー統合テスト</h2>';
+
+      test('得点アイテム取得時にフラッシュが発動する', () => {
+        Game.init();
+        ItemManager.init();
+        CharacterManager.characterId = 'moju';
+        CharacterManager.x = 200;
+        CharacterManager.y = 300;
+        const bounds = CharacterManager.getBounds();
+        ItemManager.items = [{ score: 25, x: bounds.centerX, y: bounds.centerY }];
+
+        ItemManager.checkCollisions(bounds, (item) => {
+          Effects.triggerFlash(item.score > 0, item.x, item.y);
+          Game.addScore(item.score);
+        });
+
+        assert(Effects.flash.active === true, 'flash triggered');
+        assert(Effects.flash.type === 'positive', 'positive flash');
+      });
+
+      test('減点アイテム取得時にnegativeフラッシュが発動する', () => {
+        Game.init();
+        ItemManager.init();
+        CharacterManager.x = 200;
+        CharacterManager.y = 300;
+        const bounds = CharacterManager.getBounds();
+        ItemManager.items = [{ score: -15, x: bounds.centerX, y: bounds.centerY }];
+
+        ItemManager.checkCollisions(bounds, (item) => {
+          Effects.triggerFlash(item.score > 0, item.x, item.y);
+          Game.addScore(item.score);
+        });
+
+        assert(Effects.flash.active === true, 'flash triggered');
+        assert(Effects.flash.type === 'negative', 'negative flash');
+      });
+
+      test('レベルアップ時にlevelUpエフェクトが発動する', () => {
+        Game.init();
+        CharacterManager.characterId = 'moju';
+        CharacterManager.x = 200;
+        CharacterManager.y = 300;
+        let maxNewLevel = 0;
+        const mockCollision = (item) => {
+          const levelUp = Game.addScore(item.score);
+          if (levelUp > maxNewLevel) maxNewLevel = levelUp;
+        };
+        mockCollision({ score: 100 });
+        if (maxNewLevel > 0) Effects.triggerLevelUp();
+
+        assert(Game.getLevel() === 2, 'level increased');
+        assert(Effects.levelUp.active === true, 'levelUp effect');
+      });
+
+      test('進化時にevolutionエフェクトが発動する', () => {
+        Game.init();
+        CharacterManager.characterId = 'moju';
+        Game.score = 500;
+        Game.level = 5;
+        const evo = CharacterManager.tryEvolve(5);
+        assert(evo !== null, 'evolution available');
+        assert(evo.oldCharId === 'moju', 'old char');
+        assert(evo.newCharId === 'iyadosu', 'new char');
+
+        Effects.triggerEvolution(evo.oldCharId, evo.newCharId, () => {
+          CharacterManager.evolveTo(evo.newCharId);
+        });
+        assert(Effects.evolution.active === true, 'evolution effect');
+      });
+
+      results.innerHTML += `<hr><p><strong>結果: ${passed} 成功, ${failed} 失敗</strong></p>`;
+    })();
+  </script>
+</body>
+</html>

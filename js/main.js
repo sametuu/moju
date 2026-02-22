@@ -61,7 +61,7 @@
   }
 
   function gameLoop(timestamp) {
-    const dt = Math.min((timestamp - lastTime) / 16.67, 1) * (1000 / 60);
+    const dtMs = Math.min(timestamp - lastTime, 50);
     lastTime = timestamp;
 
     const w = window.innerWidth;
@@ -74,10 +74,10 @@
     const evolutionActive = Effects.isEvolutionActive();
 
     if (!evolutionActive) {
-      ItemManager.update(dt);
+      ItemManager.update(dtMs / 1000);
       ItemManager.draw(ctx);
 
-      CharacterManager.update(dt);
+      CharacterManager.update(dtMs / 1000);
       CharacterManager.draw(ctx);
 
       let maxNewLevel = 0;
@@ -105,7 +105,7 @@
       Effects.drawEvolution(ctx, CharacterManager.x, CharacterManager.y, CharacterManager.size);
     }
 
-    Effects.update(dt);
+    Effects.update(dtMs);
     Effects.drawFlash(ctx);
     Effects.drawLevelUp(ctx);
 

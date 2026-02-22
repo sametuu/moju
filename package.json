@@ -1,0 +1,7 @@
+{
+  "name": "moju",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "echo 'test/index.html をブラウザで開いてテストを実行してください'"
+  }
+}

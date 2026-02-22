@@ -66,20 +66,21 @@ const Effects = {
     };
   },
 
-  update(dt) {
+  update(dtMs) {
     if (this.flash.active) {
-      this.flash.progress += dt * 1000;
+      this.flash.progress += dtMs;
       if (this.flash.progress >= this.flash.duration) {
         this.flash.active = false;
       }
     }
 
     if (this.levelUp.active) {
-      this.levelUp.progress += dt * 1000;
+      this.levelUp.progress += dtMs;
+      const frameFactor = dtMs / 16;
       for (const p of this.levelUp.particles) {
-        p.x += p.vx * (dt / 16);
-        p.y += p.vy * (dt / 16);
-        p.vy += 0.4 * (dt / 16);
+        p.x += p.vx * frameFactor;
+        p.y += p.vy * frameFactor;
+        p.vy += 0.4 * frameFactor;
         p.alpha = Math.max(0, 1 - this.levelUp.progress / this.levelUp.duration);
       }
       if (this.levelUp.progress >= this.levelUp.duration) {
@@ -88,7 +89,7 @@ const Effects = {
     }
 
     if (this.evolution.active) {
-      this.evolution.progress += dt * 1000;
+      this.evolution.progress += dtMs;
       if (this.evolution.progress >= this.evolution.duration) {
         this.evolution.active = false;
         if (this.evolution.onComplete) this.evolution.onComplete();
