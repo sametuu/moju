@@ -192,7 +192,9 @@
     Effects.evolution.active = false;
 
     homeScreen.classList.add('hidden');
+    homeScreen.style.display = 'none';
     inGameHomeBtn.classList.remove('hidden');
+    inGameHomeBtn.style.display = 'block';
     gameState = 'PLAYING';
   }
 
@@ -200,7 +202,9 @@
     completionScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
     inGameHomeBtn.classList.add('hidden');
+    inGameHomeBtn.style.display = 'none';
     homeScreen.classList.remove('hidden');
+    homeScreen.style.display = 'flex';
     gameState = 'HOME';
   }
 
@@ -208,7 +212,16 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    await CharacterManager.init();
+    if (startBtn) startBtn.addEventListener('click', startGame);
+    if (homeBtn) homeBtn.addEventListener('click', goHome);
+    if (retryBtn) retryBtn.addEventListener('click', goHome);
+    if (inGameHomeBtn) inGameHomeBtn.addEventListener('click', goHome);
+
+    try {
+      await CharacterManager.init();
+    } catch (e) {
+      console.error('CharacterManager.init failed:', e);
+    }
 
     if (window.DEBUG_MODE) {
       homeScreen.classList.add('hidden');
@@ -229,11 +242,6 @@
     document.addEventListener('mouseup', () => {});
     canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
     canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
-
-    startBtn.addEventListener('click', startGame);
-    homeBtn.addEventListener('click', goHome);
-    retryBtn.addEventListener('click', goHome);
-    inGameHomeBtn.addEventListener('click', goHome);
 
     lastTime = performance.now();
     rafId = requestAnimationFrame(gameLoop);

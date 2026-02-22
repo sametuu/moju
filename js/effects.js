@@ -164,14 +164,13 @@ const Effects = {
     ctx.restore();
   },
 
-  drawEvolution(ctx, _characterX, _characterY, characterSize) {
+  drawEvolution(ctx, characterX, characterY, characterSize) {
     if (!this.evolution.active) return;
     const t = this.evolution.progress / this.evolution.duration;
     const w = window.innerWidth;
     const h = window.innerHeight;
     const centerX = w / 2;
-    const iconCenterY = h * 0.35;
-    const textBaseY = h * 0.82;
+    const centerY = h / 2;
 
     if (t < 0.2) {
       const a = t / 0.2;
@@ -188,7 +187,7 @@ const Effects = {
       if (img && img.complete) {
         ctx.drawImage(img,
           centerX - characterSize * pulse / 2,
-          iconCenterY - characterSize * pulse / 2,
+          centerY - characterSize * pulse / 2,
           characterSize * pulse,
           characterSize * pulse);
       }
@@ -204,31 +203,31 @@ const Effects = {
       if (img && img.complete) {
         ctx.drawImage(img,
           centerX - characterSize * scale / 2,
-          iconCenterY - characterSize * scale / 2,
+          centerY - characterSize * scale / 2,
           characterSize * scale,
           characterSize * scale);
       }
       ctx.restore();
     } else {
-      ctx.fillStyle = `rgba(255, 255, 255, ${Math.min((t - 0.6) / 0.2 * 0.3, 0.3)})`;
+      const overlayAlpha = (t - 0.6) / 0.2;
+      ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(overlayAlpha * 0.3, 0.3)})`;
       ctx.fillRect(0, 0, w, h);
       const img = CharacterManager.images[this.evolution.newCharId];
       if (img && img.complete) {
         ctx.drawImage(img,
           centerX - characterSize / 2,
-          iconCenterY - characterSize / 2,
+          centerY - characterSize / 2,
           characterSize,
           characterSize);
       }
       const char = CHARACTERS[this.evolution.newCharId];
       if (char) {
-        const overlayAlpha = (t - 0.6) / 0.2;
         ctx.fillStyle = `rgba(0,0,0,${0.9 - overlayAlpha * 0.5})`;
         ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('進化!', centerX, textBaseY);
+        ctx.fillText('進化!', centerX, h - 80);
         ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(char.name + ' に進化した!', centerX, textBaseY + 45);
+        ctx.fillText(char.name + ' に進化した!', centerX, h - 40);
       }
     }
   },

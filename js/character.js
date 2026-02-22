@@ -16,15 +16,18 @@ const CharacterManager = {
     this.characterId = DEFAULT_CHARACTER_ID;
 
     const loadPromises = Object.values(CHARACTERS).map(char => {
-        img.onerror = () => resolve();
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => resolve();
+        img.onerror = () => resolve();
         img.src = char.image;
         this.images[char.id] = img;
       });
     });
-    await Promise.all(loadPromises);
+    await Promise.race([
+      Promise.all(loadPromises),
+      new Promise(r => setTimeout(r, 3000))
+    ]);
   },
 
   setTarget(x, y) {
