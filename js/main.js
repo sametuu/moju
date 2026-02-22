@@ -36,6 +36,30 @@
     }
   }
 
+  function drawExpBar(ctx) {
+    const barW = Math.min(200, window.innerWidth - 30);
+    const barH = 10;
+    const x = 10;
+    const y = 54;
+    const progress = Game.getExpProgress();
+    const remaining = Game.getRemainingToNextLevel();
+
+    ctx.fillStyle = 'rgba(60,60,60,0.9)';
+    ctx.fillRect(x, y, barW, barH);
+
+    ctx.fillStyle = '#4ade80';
+    ctx.fillRect(x, y, barW * Math.min(1, progress), barH);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, barW, barH);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('次のレベルまであと ' + remaining, x, y + barH + 14);
+  }
+
   function gameLoop(timestamp) {
     const dt = Math.min((timestamp - lastTime) / 16.67, 1) * (1000 / 60);
     lastTime = timestamp;
@@ -45,32 +69,54 @@
     ctx.clearRect(0, 0, w, h);
 
     ctx.fillStyle = '#87ceeb';
-    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    ctx.fillRect(0, 0, w, h);
 
-    ItemManager.update(dt);
-    ItemManager.draw(ctx);
+    const evolutionActive = Effects.isEvolutionActive();
 
-    CharacterManager.update(dt);
-    CharacterManager.draw(ctx);
+    if (!evolutionActive) {
+      ItemManager.update(dt);
+      ItemManager.draw(ctx);
 
-    let maxNewLevel = 0;
-    ItemManager.checkCollisions(CharacterManager.getBounds(), (item) => {
-      const levelUp = Game.addScore(item.score);
-      if (levelUp > maxNewLevel) maxNewLevel = levelUp;
-    });
-    if (maxNewLevel > 0) {
-      for (let l = 1; l <= maxNewLevel; l++) {
-        CharacterManager.tryEvolve(l);
+      CharacterManager.update(dt);
+      CharacterManager.draw(ctx);
+
+      let maxNewLevel = 0;
+      let evolutionInfo = null;
+      ItemManager.checkCollisions(CharacterManager.getBounds(), (item) => {
+        Effects.triggerFlash(item.score > 0, item.x, item.y);
+        const levelUp = Game.addScore(item.score);
+        if (levelUp > maxNewLevel) maxNewLevel = levelUp;
+      });
+      if (maxNewLevel > 0) {
+        Effects.triggerLevelUp();
       }
+      if (maxNewLevel > 0) {
+        for (let l = 1; l <= maxNewLevel; l++) {
+          const evo = CharacterManager.tryEvolve(l);
+          if (evo) evolutionInfo = evo;
+        }
+        if (evolutionInfo) {
+          Effects.triggerEvolution(evolutionInfo.oldCharId, evolutionInfo.newCharId, () => {
+            CharacterManager.evolveTo(evolutionInfo.newCharId);
+          });
+        }
+      }
+    } else {
+      Effects.drawEvolution(ctx, CharacterManager.x, CharacterManager.y, CharacterManager.size);
     }
 
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    ctx.fillRect(0, 0, 140, 50);
+    Effects.update(dt);
+    Effects.drawFlash(ctx);
+    Effects.drawLevelUp(ctx);
+
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(0, 0, 220, 82);
     ctx.fillStyle = '#fff';
     ctx.font = 'bold 14px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText('スコア: ' + Game.getScore(), 10, 22);
     ctx.fillText('Lv.' + Game.getLevel(), 10, 42);
+    drawExpBar(ctx);
 
     rafId = requestAnimationFrame(gameLoop);
   }

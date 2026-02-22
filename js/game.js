@@ -37,5 +37,19 @@ const Game = {
 
   getScoreForLevel(level) {
     return (level - 1) * this.levelThreshold;
+  },
+
+  getScoreToNextLevel() {
+    return this.level * this.levelThreshold;
+  },
+
+  getRemainingToNextLevel() {
+    return Math.max(0, this.getScoreToNextLevel() - this.score);
+  },
+
+  getExpProgress() {
+    const current = this.getScoreForLevel(this.level);
+    const next = this.getScoreToNextLevel();
+    return (this.score - current) / (next - current);
   }
 };

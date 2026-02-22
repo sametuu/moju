@@ -72,12 +72,15 @@ const CharacterManager = {
 
   tryEvolve(level) {
     const char = CHARACTERS[this.characterId];
-    if (!char || !char.evolutions) return false;
+    if (!char || !char.evolutions) return null;
     const evolution = char.evolutions.find(e => e.level === level);
     if (evolution) {
-      this.characterId = evolution.characterId;
-      return true;
+      return { oldCharId: this.characterId, newCharId: evolution.characterId };
     }
-    return false;
+    return null;
+  },
+
+  evolveTo(characterId) {
+    this.characterId = characterId;
   }
 };
