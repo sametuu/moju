@@ -4,7 +4,7 @@ const Game = {
   life: 100,
   maxLife: 100,
   levelThreshold: 100,
-  maxLevel: typeof MAX_LEVEL !== 'undefined' ? MAX_LEVEL : 10,
+  maxLevel: 55,
   difficulty: null,
   evolutionCount: 0,
 
@@ -16,7 +16,8 @@ const Game = {
     this.evolutionCount = 0;
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
     this.difficulty = diff;
-    this.levelThreshold = diff.levelThreshold;
+    this.levelThreshold = typeof LEVEL_THRESHOLD !== 'undefined' ? LEVEL_THRESHOLD : 100;
+    this.maxLevel = diff.maxLevel ?? MAX_LEVEL;
   },
 
   damageLife(amount) {
@@ -58,7 +59,7 @@ const Game = {
   },
 
   checkLevelUp() {
-    const newLevel = this.getLevelForScore(this.score);
+    const newLevel = Math.min(this.getLevelForScore(this.score), this.maxLevel);
     if (newLevel > this.level) {
       this.level = newLevel;
       return this.level;

@@ -3,6 +3,9 @@
 // クリア条件: このレベルに達するとクリア（pc_master到達はLv55）
 const MAX_LEVEL = 55;
 
+// レベル計算用（難易度に依存しない。進化の順番・必要レベルは全難易度で同一）
+const LEVEL_THRESHOLD = 100;
+
 // キャラクター進化設定（moju→moju_nasi→moju_furo→moju_valentain固定、最後はpc_master）
 const EVOLUTIONS = {
   moju: [{ level: 3, characterId: 'moju_nasi' }],
@@ -26,6 +29,8 @@ const EVOLUTIONS = {
 };
 
 // 難易度設定
+// maxLevel: この難易度で到達可能な最大レベル（進化チェーン・必要レベルは共通、難しいほど後ろのキャラに到達可能）
+//   easy Lv29→ブンチョー / normal Lv45→温泉いぬ / hard Lv55→pc_master
 // hitsToDie: 悪いアイテムに何回当たるとゲームオーバーか
 // itemRates: カテゴリ別出現率（初期→最終レベルで補間）
 //   initial: レベル1の出現率（加点/ダメージ/回復）
@@ -34,6 +39,7 @@ const EVOLUTIONS = {
 const DIFFICULTIES = {
   easy: {
     name: 'かんたん',
+    maxLevel: 29,
     spawnInterval: 1200,
     itemRates: {
       initial: { plus: 0.80, damage: 0.17, heal: 0.03 },
@@ -43,12 +49,12 @@ const DIFFICULTIES = {
     fallSpeed: 2.2,
     speedPerLevel: 0.04,
     maxFallSpeed: 4.0,
-    levelThreshold: 80,
     itemSize: 44,
     hitsToDie: 20
   },
   normal: {
     name: 'ふつう',
+    maxLevel: 45,
     spawnInterval: 600,
     itemRates: {
       initial: { plus: 0.80, damage: 0.18, heal: 0.02 },
@@ -58,12 +64,12 @@ const DIFFICULTIES = {
     fallSpeed: 3.5,
     speedPerLevel: 0.08,
     maxFallSpeed: 6.5,
-    levelThreshold: 120,
     itemSize: 36,
     hitsToDie: 5
   },
   hard: {
     name: 'むずかしい',
+    maxLevel: 55,
     spawnInterval: 400,
     itemRates: {
       initial: { plus: 0.80, damage: 0.195, heal: 0.005 },
@@ -73,7 +79,6 @@ const DIFFICULTIES = {
     fallSpeed: 4.5,
     speedPerLevel: 0.12,
     maxFallSpeed: 9.0,
-    levelThreshold: 150,
     itemSize: 32,
     hitsToDie: 3
   }
