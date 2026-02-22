@@ -78,6 +78,21 @@ const DIFFICULTIES = {
     maxFallSpeed: 9.0,
     itemSize: 32,
     hitsToDie: 3
+  },
+  endless: {
+    name: 'エンドレス',
+    maxLevel: 9999,
+    spawnInterval: 400,
+    itemRates: {
+      initial: { plus: 0.80, damage: 0.195, heal: 0.01 },
+      final: { plus: 0.50, damage: 0.495, heal: 0.01 },
+      finalLevel: 60
+    },
+    fallSpeed: 4.5,
+    speedPerLevel: 0.12,
+    maxFallSpeed: 9.0,
+    itemSize: 32,
+    hitsToDie: 3
   }
 };
 

@@ -191,6 +191,36 @@ body.debug-mode .debug-only input {
   display: none;
 }
 
+.pause-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 5;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.pause-btn.hidden {
+  display: none;
+}
+
+#pauseScreen {
+  background: rgba(135, 206, 235, 0.9);
+}
+
+.pause-title {
+  font-size: clamp(20px, 6vw, 28px);
+  color: #333;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
 .version {
   position: absolute;
   bottom: 12px;

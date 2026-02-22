@@ -9,10 +9,11 @@
         return {
           easy: this._normalize(parsed.easy),
           normal: this._normalize(parsed.normal),
-          hard: this._normalize(parsed.hard)
+          hard: this._normalize(parsed.hard),
+          endless: this._normalize(parsed.endless)
         };
       } catch {
-        return { easy: { score: 0, level: 1 }, normal: { score: 0, level: 1 }, hard: { score: 0, level: 1 } };
+        return { easy: { score: 0, level: 1 }, normal: { score: 0, level: 1 }, hard: { score: 0, level: 1 }, endless: { score: 0, level: 1 } };
       }
     },
     _normalize(v) {
@@ -52,6 +53,9 @@
   const gameOverScreen = document.getElementById('gameOverScreen');
   const gameOverStats = document.getElementById('gameOverStats');
   const quitGameBtn = document.getElementById('quitGameBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const pauseScreen = document.getElementById('pauseScreen');
+  const resumeBtn = document.getElementById('resumeBtn');
   const startBtn = document.getElementById('startBtn');
   const homeBtn = document.getElementById('homeBtn');
   const retryBtn = document.getElementById('retryBtn');
@@ -64,8 +68,8 @@
   function updateHighScoreDisplay() {
     if (!highScoreDisplay) return;
     const data = HighScore.load();
-    const names = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい' };
-    const lines = ['easy', 'normal', 'hard'].map(k => {
+    const names = { easy: 'かんたん', normal: 'ふつう', hard: 'むずかしい', endless: 'エンドレス' };
+    const lines = ['easy', 'normal', 'hard', 'endless'].map(k => {
       const h = data[k] ?? { score: 0, level: 1 };
       return `${names[k]}: Lv.${h.level}　スコア${h.score}`;
     });
@@ -153,6 +157,14 @@
       ctx.fillRect(0, 0, w, h);
       Effects.update(dtMs);
       Effects.drawQuitResult(ctx);
+      rafId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
+    if (gameState === 'PAUSED') {
+      ItemManager.draw(ctx);
+      CharacterManager.draw(ctx);
+      pauseScreen.classList.remove('hidden');
       rafId = requestAnimationFrame(gameLoop);
       return;
     }
@@ -334,6 +346,11 @@
       } else {
         console.error('startGame: quitGameBtn is null');
       }
+      if (pauseBtn) {
+        pauseBtn.classList.remove('hidden');
+        pauseBtn.style.display = 'block';
+      }
+      pauseScreen.classList.add('hidden');
       gameState = 'PLAYING';
     } catch (e) {
       console.error('startGame error:', e);
@@ -352,11 +369,30 @@
     }
   }
 
+  function pauseGame() {
+    if (gameState === 'PLAYING') {
+      gameState = 'PAUSED';
+      pauseScreen.classList.remove('hidden');
+    }
+  }
+
+  function resumeGame() {
+    if (gameState === 'PAUSED') {
+      gameState = 'PLAYING';
+      pauseScreen.classList.add('hidden');
+    }
+  }
+
   function goHome() {
     completionScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
+    pauseScreen.classList.add('hidden');
     quitGameBtn.classList.add('hidden');
     quitGameBtn.style.display = 'none';
+    if (pauseBtn) {
+      pauseBtn.classList.add('hidden');
+      pauseBtn.style.display = 'none';
+    }
     homeScreen.classList.remove('hidden');
     homeScreen.style.display = 'flex';
     gameState = 'HOME';
@@ -401,6 +437,8 @@
     addTapHandler(homeBtn, goHome);
     addTapHandler(retryBtn, goHome);
     addTapHandler(quitGameBtn, quitGame);
+    addTapHandler(pauseBtn, pauseGame);
+    addTapHandler(resumeBtn, resumeGame);
 
     try {
       await CharacterManager.init();
