@@ -2,10 +2,15 @@ const Game = {
   score: 0,
   level: 1,
   levelThreshold: 100,
+  maxLevel: typeof MAX_LEVEL !== 'undefined' ? MAX_LEVEL : 10,
+  difficulty: null,
 
-  init() {
+  init(difficultyKey) {
     this.score = 0;
     this.level = 1;
+    const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
+    this.difficulty = diff;
+    this.levelThreshold = diff.levelThreshold;
   },
 
   addScore(delta) {
@@ -51,5 +56,9 @@ const Game = {
     const current = this.getScoreForLevel(this.level);
     const next = this.getScoreToNextLevel();
     return (this.score - current) / (next - current);
+  },
+
+  isCleared() {
+    return this.level >= this.maxLevel;
   }
 };

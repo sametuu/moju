@@ -7,9 +7,13 @@ const ItemManager = {
   totalWeight: 0,
   imageCache: {},
 
-  init() {
+  init(difficultyKey) {
     this.items = [];
     this.lastSpawn = 0;
+    const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
+    this.spawnInterval = diff.spawnInterval;
+    this.fallSpeed = diff.fallSpeed;
+    this.itemSize = diff.itemSize;
     this.totalWeight = ITEMS.reduce((sum, item) => sum + item.weight, 0);
     this.preloadImages();
   },

@@ -10,6 +10,27 @@
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+
+  <div id="homeScreen" class="overlay">
+    <h1 class="title">もじゅゲーム</h1>
+    <p class="subtitle">アイテムを集めてキャラを進化させよう！</p>
+    <div class="difficulty">
+      <label>難易度:</label>
+      <select id="difficultySelect">
+        <option value="easy">かんたん</option>
+        <option value="normal" selected>ふつう</option>
+        <option value="hard">むずかしい</option>
+      </select>
+    </div>
+    <button id="startBtn" class="btn">冒険に出発！</button>
+  </div>
+
+  <div id="completionScreen" class="overlay hidden">
+    <h2 class="completion-title">おめでとう、これであなたはもじゅマスターです！！</h2>
+    <button id="homeBtn" class="btn">ホームに戻る</button>
+  </div>
+
+  <script src="js/data/config.js"></script>
   <script src="js/data/characters.js"></script>
   <script src="js/data/items.js"></script>
   <script src="js/game.js"></script>

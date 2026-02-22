@@ -1,8 +1,14 @@
 (function() {
   const canvas = document.getElementById('gameCanvas');
   const ctx = canvas.getContext('2d');
+  const homeScreen = document.getElementById('homeScreen');
+  const completionScreen = document.getElementById('completionScreen');
+  const startBtn = document.getElementById('startBtn');
+  const homeBtn = document.getElementById('homeBtn');
+  const difficultySelect = document.getElementById('difficultySelect');
   let lastTime = 0;
   let rafId = null;
+  let gameState = 'HOME';
 
   function resizeCanvas() {
     const dpr = window.devicePixelRatio || 1;
@@ -71,6 +77,18 @@
     ctx.fillStyle = '#87ceeb';
     ctx.fillRect(0, 0, w, h);
 
+    if (gameState !== 'PLAYING') {
+      rafId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
+    if (Game.isCleared()) {
+      gameState = 'COMPLETED';
+      completionScreen.classList.remove('hidden');
+      rafId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
     const evolutionActive = Effects.isEvolutionActive();
 
     if (!evolutionActive) {
@@ -121,6 +139,29 @@
     rafId = requestAnimationFrame(gameLoop);
   }
 
+  function startGame() {
+    const difficulty = difficultySelect.value;
+    Game.init(difficulty);
+    ItemManager.init(difficulty);
+    CharacterManager.characterId = DEFAULT_CHARACTER_ID;
+    CharacterManager.x = window.innerWidth / 2 - CharacterManager.size / 2;
+    CharacterManager.y = window.innerHeight / 2 - CharacterManager.size / 2;
+    CharacterManager.targetX = CharacterManager.x;
+    CharacterManager.targetY = CharacterManager.y;
+    Effects.flash.active = false;
+    Effects.levelUp.active = false;
+    Effects.evolution.active = false;
+
+    homeScreen.classList.add('hidden');
+    gameState = 'PLAYING';
+  }
+
+  function goHome() {
+    completionScreen.classList.add('hidden');
+    homeScreen.classList.remove('hidden');
+    gameState = 'HOME';
+  }
+
   async function init() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -131,9 +172,10 @@
     canvas.addEventListener('touchstart', handlePointerDown, { passive: false });
     canvas.addEventListener('touchmove', handlePointerMove, { passive: false });
 
-    Game.init();
+    startBtn.addEventListener('click', startGame);
+    homeBtn.addEventListener('click', goHome);
+
     await CharacterManager.init();
-    ItemManager.init();
 
     lastTime = performance.now();
     rafId = requestAnimationFrame(gameLoop);
