@@ -86,6 +86,26 @@ html, body {
   cursor: pointer;
 }
 
+.debug-only {
+  display: none;
+}
+
+body.debug-mode .debug-only {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+body.debug-mode .debug-only input {
+  width: 60px;
+  font-size: 16px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 2px solid #87ceeb;
+  text-align: center;
+}
+
 .btn {
   font-size: clamp(18px, 5vw, 24px);
   padding: 16px 40px;

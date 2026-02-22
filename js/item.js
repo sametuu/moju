@@ -101,7 +101,9 @@ const ItemManager = {
   update(dt) {
     this.updateFallSpeed();
     const now = Date.now();
-    if (now - this.lastSpawn > this.spawnInterval) {
+    const mult = (window.DEBUG_MODE && window.DEBUG_SPAWN_MULTIPLIER) ? window.DEBUG_SPAWN_MULTIPLIER : 1;
+    const interval = this.spawnInterval / mult;
+    if (now - this.lastSpawn > interval) {
       this.spawn();
       this.lastSpawn = now;
     }

@@ -13,6 +13,13 @@ const Effects = {
     newCharId: null,
     onComplete: null
   },
+  completion: {
+    active: false,
+    progress: 0,
+    duration: 4000,
+    confetti: [],
+    onComplete: null
+  },
 
   triggerFlash(positive, centerX, centerY) {
     const cx = centerX ?? window.innerWidth / 2;
@@ -97,6 +104,38 @@ const Effects = {
     };
   },
 
+  triggerCompletion(onComplete) {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const cx = w / 2;
+    const cy = h / 2;
+    const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9', '#fd79a8'];
+    const confetti = [];
+    for (let i = 0; i < 80; i++) {
+      const angle = (Math.PI * 2 * i) / 80 + Math.random() * 0.5;
+      const speed = 8 + Math.random() * 12;
+      confetti.push({
+        x: cx,
+        y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 6,
+        w: 6 + Math.random() * 8,
+        h: 4 + Math.random() * 6,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1
+      });
+    }
+    this.completion = {
+      active: true,
+      progress: 0,
+      duration: 4000,
+      confetti,
+      onComplete
+    };
+  },
+
   update(dtMs) {
     if (this.flash.active) {
       this.flash.progress += dtMs;
@@ -138,6 +177,23 @@ const Effects = {
       if (this.evolution.progress >= this.evolution.duration) {
         this.evolution.active = false;
         if (this.evolution.onComplete) this.evolution.onComplete();
+      }
+    }
+
+    if (this.completion.active) {
+      this.completion.progress += dtMs;
+      const frameFactor = dtMs / 16;
+      for (const c of this.completion.confetti) {
+        c.x += c.vx * frameFactor;
+        c.y += c.vy * frameFactor;
+        c.vy += 0.5 * frameFactor;
+        c.rot += c.rotSpeed * frameFactor;
+        const t = this.completion.progress / this.completion.duration;
+        c.alpha = Math.max(0, 1 - t * 1.2);
+      }
+      if (this.completion.progress >= this.completion.duration) {
+        this.completion.active = false;
+        if (this.completion.onComplete) this.completion.onComplete();
       }
     }
   },
@@ -355,7 +411,79 @@ const Effects = {
     }
   },
 
+  drawCompletion(ctx) {
+    if (!this.completion.active) return;
+    const progress = this.completion.progress;
+    const duration = this.completion.duration;
+    const dpr = window.devicePixelRatio || 1;
+    const w = ctx.canvas.width / dpr;
+    const h = ctx.canvas.height / dpr;
+    const cx = w / 2;
+    const cy = h / 2;
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+    ctx.fillRect(0, 0, w, h);
+
+    for (const c of this.completion.confetti) {
+      ctx.save();
+      ctx.translate(c.x, c.y);
+      ctx.rotate(c.rot);
+      ctx.globalAlpha = c.alpha;
+      ctx.fillStyle = c.color;
+      ctx.fillRect(-c.w / 2, -c.h / 2, c.w, c.h);
+      ctx.restore();
+    }
+
+    const popInDur = 600;
+    const holdDur = 2800;
+    const fadeOutDur = 600;
+    let textScale = 1;
+    let textAlpha = 1;
+    if (progress < popInDur) {
+      const t = progress / popInDur;
+      textScale = 0.3 + 0.7 * (1 - Math.pow(1 - t, 3));
+      textAlpha = Math.min(1, t * 2);
+    } else if (progress < holdDur) {
+      textScale = 1 + Math.sin(progress * 0.008) * 0.05;
+    } else {
+      const t = (progress - holdDur) / fadeOutDur;
+      textAlpha = Math.max(0, 1 - t);
+    }
+
+    ctx.save();
+    ctx.globalAlpha = textAlpha;
+    ctx.translate(cx, cy - 40);
+    ctx.scale(textScale, textScale);
+    ctx.fillStyle = '#ffd700';
+    ctx.strokeStyle = '#b8860b';
+    ctx.lineWidth = 5;
+    ctx.font = 'bold 48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.strokeText('クリア！', 0, 0);
+    ctx.fillText('クリア！', 0, 0);
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillStyle = '#555';
+    ctx.strokeStyle = 'transparent';
+    ctx.fillText('おめでとう、もじゅマスター！', 0, 36);
+    ctx.restore();
+
+    const charId = CharacterManager.getCurrentCharacterId();
+    const img = CharacterManager.images[charId];
+    if (img && img.complete) {
+      const size = 100;
+      const charY = cy + 50;
+      ctx.save();
+      ctx.globalAlpha = textAlpha;
+      ctx.drawImage(img, cx - size / 2, charY - size / 2, size, size);
+      ctx.restore();
+    }
+  },
+
   isEvolutionActive() {
     return this.evolution.active;
+  },
+
+  isCompletionActive() {
+    return this.completion.active;
   }
 };

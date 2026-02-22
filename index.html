@@ -23,6 +23,11 @@
         <option value="hard">むずかしい</option>
       </select>
     </div>
+    <div id="debugSpawnRow" class="debug-only">
+      <label for="spawnMultiplier">出現頻度:</label>
+      <input type="number" id="spawnMultiplier" min="1" max="100" value="5" step="1">
+      <span>倍</span>
+    </div>
     <button id="startBtn" class="btn">冒険に出発！</button>
     <span class="version">v0.1.0</span>
   </div>
@@ -44,6 +49,7 @@
 
   <script>
     window.DEBUG_MODE = /[?&]debug=(1|true)/i.test(location.search);
+    if (window.DEBUG_MODE) document.body.classList.add('debug-mode');
   </script>
   <script src="js/data/config.js"></script>
   <script src="js/data/characters.js"></script>

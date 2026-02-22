@@ -82,6 +82,13 @@
     ctx.fillStyle = '#87ceeb';
     ctx.fillRect(0, 0, w, h);
 
+    if (gameState === 'COMPLETING') {
+      Effects.update(dtMs);
+      Effects.drawCompletion(ctx);
+      rafId = requestAnimationFrame(gameLoop);
+      return;
+    }
+
     if (gameState !== 'PLAYING') {
       rafId = requestAnimationFrame(gameLoop);
       return;
@@ -99,12 +106,18 @@
     }
 
     if (Game.isCleared()) {
-      gameState = 'COMPLETED';
+      gameState = 'COMPLETING';
       if (completionStats) {
         const diffName = Game.difficulty ? Game.difficulty.name : 'ふつう';
         completionStats.textContent = `難易度: ${diffName}　スコア: ${Game.getScore()}　残りライフ: ${Math.floor(Game.life)}`;
       }
-      completionScreen.classList.remove('hidden');
+      Effects.triggerCompletion(() => {
+        completionScreen.classList.remove('hidden');
+        gameState = 'COMPLETED';
+      });
+    }
+
+    if (gameState !== 'PLAYING') {
       rafId = requestAnimationFrame(gameLoop);
       return;
     }
@@ -120,21 +133,31 @@
 
       let maxNewLevel = 0;
       let evolutionInfo = null;
-      ItemManager.checkCollisions(CharacterManager.getBounds(), (item) => {
+      let totalScoreDelta = 0;
+      const collected = ItemManager.checkCollisions(CharacterManager.getBounds());
+
+      function processCollectedItem(item) {
         if (item.lifeHeal) {
           Game.healLife(item.lifeHeal);
           const healMsg = item.lifeHeal >= 1 ? 'おー！ライフ全回復！' : 'ライフ回復！';
           Effects.triggerLifeHeal(item.x, item.y, healMsg);
-        } else {
-          Effects.triggerFlash(item.score > 0, item.x, item.y);
-          if (item.score < 0 && !window.DEBUG_MODE) {
-            const dmg = Game.getLifeDamage(item);
-            Game.damageLife(dmg);
-          }
+          return 0;
         }
-        const levelUp = Game.addScore(item.score || 0);
+        Effects.triggerFlash(item.score > 0, item.x, item.y);
+        if (item.score < 0 && !window.DEBUG_MODE) {
+          const dmg = Game.getLifeDamage(item);
+          Game.damageLife(dmg);
+        }
+        const score = item.score || 0;
+        return (window.DEBUG_MODE && score < 0) ? 0 : score;
+      }
+      for (const item of collected) {
+        totalScoreDelta += processCollectedItem(item);
+      }
+      if (collected.length > 0) {
+        const levelUp = Game.addScore(totalScoreDelta);
         if (levelUp > maxNewLevel) maxNewLevel = levelUp;
-      });
+      }
       if (maxNewLevel > 0) {
         Effects.triggerLevelUp();
       }
@@ -196,6 +219,10 @@
 
   function startGame() {
     const difficulty = difficultySelect.value;
+    if (window.DEBUG_MODE) {
+      const el = document.getElementById('spawnMultiplier');
+      window.DEBUG_SPAWN_MULTIPLIER = Math.max(1, parseFloat(el?.value) || 5);
+    }
     Game.init(difficulty);
     ItemManager.init(difficulty);
     CharacterManager.characterId = DEFAULT_CHARACTER_ID;
@@ -206,6 +233,7 @@
     Effects.flash.active = false;
     Effects.levelUp.active = false;
     Effects.evolution.active = false;
+    Effects.completion.active = false;
 
     homeScreen.classList.add('hidden');
     homeScreen.style.display = 'none';
