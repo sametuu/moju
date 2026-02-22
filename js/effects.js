@@ -167,8 +167,9 @@ const Effects = {
   drawEvolution(ctx, characterX, characterY, characterSize) {
     if (!this.evolution.active) return;
     const t = this.evolution.progress / this.evolution.duration;
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const w = ctx.canvas.width / dpr;
+    const h = ctx.canvas.height / dpr;
     const centerX = w / 2;
     const centerY = h / 2;
 
@@ -222,7 +223,8 @@ const Effects = {
       }
       const char = CHARACTERS[this.evolution.newCharId];
       if (char) {
-        const textY = centerY + characterSize / 2 + 36;
+        const iconBottom = centerY + characterSize / 2;
+        const textY = Math.min(iconBottom + 28, h - 90);
         ctx.fillStyle = `rgba(0,0,0,${0.9 - overlayAlpha * 0.5})`;
         ctx.font = 'bold 32px sans-serif';
         ctx.textAlign = 'center';
