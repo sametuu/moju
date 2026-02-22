@@ -11,7 +11,11 @@ const ItemManager = {
     this.items = [];
     this.lastSpawn = 0;
     const diff = DIFFICULTIES[difficultyKey || DEFAULT_DIFFICULTY] || DIFFICULTIES.normal;
-    this.healChance = diff.healChance ?? 0.02;
+    this.itemRates = diff.itemRates || {
+      initial: { plus: 0.80, damage: 0.18, heal: 0.02 },
+      final: { plus: 0.60, damage: 0.38, heal: 0.02 },
+      finalLevel: 40
+    };
     this.baseFallSpeed = diff.fallSpeed;
     this.speedPerLevel = diff.speedPerLevel ?? 0.08;
     this.maxFallSpeed = diff.maxFallSpeed ?? 6.5;
@@ -42,28 +46,42 @@ const ItemManager = {
     }
   },
 
-  getRandomItem() {
+  getCategoryRates() {
     const level = Game.getLevel();
-    const pool = ITEMS.filter(i => (i.unlockLevel ?? 1) <= level && !i.lifeHeal);
-    if (pool.length === 0) return { ...ITEMS[0] };
-    const total = pool.reduce((s, i) => s + i.weight, 0);
-    let r = Math.random() * total;
-    for (const item of pool) {
-      r -= item.weight;
-      if (r <= 0) return { ...item };
-    }
-    return { ...pool[0] };
+    const { initial, final: fin, finalLevel } = this.itemRates;
+    const t = Math.min(1, (level - 1) / Math.max(1, finalLevel - 1));
+    return {
+      plus: initial.plus + (fin.plus - initial.plus) * t,
+      damage: initial.damage + (fin.damage - initial.damage) * t,
+      heal: initial.heal + (fin.heal - initial.heal) * t
+    };
   },
 
-  getRandomHealingItem() {
-    const healItems = ITEMS.filter(i => i.lifeHeal && (i.unlockLevel ?? 1) <= Game.getLevel());
-    if (healItems.length === 0) return this.getRandomItem();
-    return { ...healItems[Math.floor(Math.random() * healItems.length)] };
+  getRandomItemByCategory(category) {
+    const level = Game.getLevel();
+    let pool;
+    if (category === 'plus') {
+      pool = ITEMS.filter(i => (i.unlockLevel ?? 1) <= level && (i.score ?? 0) > 0 && !i.lifeHeal);
+    } else if (category === 'damage') {
+      pool = ITEMS.filter(i => (i.unlockLevel ?? 1) <= level && (i.score ?? 0) < 0);
+    } else {
+      pool = ITEMS.filter(i => (i.unlockLevel ?? 1) <= level && i.lifeHeal);
+    }
+    if (pool.length === 0) {
+      const fallback = ITEMS.find(i => (i.unlockLevel ?? 1) <= level);
+      return fallback ? { ...fallback } : { ...ITEMS[0] };
+    }
+    return { ...pool[Math.floor(Math.random() * pool.length)] };
   },
 
   spawn() {
-    const isHeal = Math.random() < this.healChance;
-    const item = isHeal ? this.getRandomHealingItem() : this.getRandomItem();
+    const rates = this.getCategoryRates();
+    const r = Math.random();
+    let category;
+    if (r < rates.plus) category = 'plus';
+    else if (r < rates.plus + rates.damage) category = 'damage';
+    else category = 'heal';
+    const item = this.getRandomItemByCategory(category);
     const x = window.DEBUG_MODE
       ? window.innerWidth / 2
       : Math.random() * (window.innerWidth - this.itemSize) + this.itemSize / 2;

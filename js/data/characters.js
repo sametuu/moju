@@ -11,6 +11,18 @@ const CHARACTERS = {
     image: 'assets/characters/moju_nasi.jpg',
     evolutions: []
   },
+  moju_furo: {
+    id: 'moju_furo',
+    name: 'ふろもじゅ',
+    image: 'assets/characters/moju_furo.jpg',
+    evolutions: []
+  },
+  moju_valentain: {
+    id: 'moju_valentain',
+    name: 'バレンタインもじゅ',
+    image: 'assets/characters/moju_valentain.jpg',
+    evolutions: []
+  },
   '13fes_koara': {
     id: '13fes_koara',
     name: '13フェスコアラ',
@@ -23,6 +35,12 @@ const CHARACTERS = {
     image: 'assets/characters/2024_cat.jpg',
     evolutions: []
   },
+  araiguma: {
+    id: 'araiguma',
+    name: 'アライグマ',
+    image: 'assets/characters/araiguma.jpg',
+    evolutions: []
+  },
   baku: {
     id: 'baku',
     name: 'ばく',
@@ -33,6 +51,12 @@ const CHARACTERS = {
     id: 'baru',
     name: 'バル',
     image: 'assets/characters/baru.jpg',
+    evolutions: []
+  },
+  buncho: {
+    id: 'buncho',
+    name: 'ブンチョウ',
+    image: 'assets/characters/buncho.jpg',
     evolutions: []
   },
   double_dog: {
@@ -53,6 +77,12 @@ const CHARACTERS = {
     image: 'assets/characters/iyadosu.png',
     evolutions: []
   },
+  merubou: {
+    id: 'merubou',
+    name: 'メルボー',
+    image: 'assets/characters/merubou.jpg',
+    evolutions: []
+  },
   onsen_wan: {
     id: 'onsen_wan',
     name: '温泉いぬ',
@@ -63,6 +93,12 @@ const CHARACTERS = {
     id: 'same',
     name: 'サメ先生',
     image: 'assets/characters/same.jpg',
+    evolutions: []
+  },
+  woo: {
+    id: 'woo',
+    name: 'うぉー',
+    image: 'assets/characters/woo.jpg',
     evolutions: []
   },
   pc_master: {

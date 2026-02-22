@@ -56,6 +56,6 @@ const ITEMS = [
   { id: 'battery', name: '電池切れ', score: -11, weight: 2, color: '#808080', emoji: '1f50b', lifeDamage: 0.8, unlockLevel: 50 },
   { id: 'floppy', name: 'フロッピー', score: -13, weight: 1, color: '#4a4a4a', emoji: '1f4be', lifeDamage: 0.9, unlockLevel: 50 },
   // ライフ回復アイテム 2種（100回に1回、必ずどちらかが出現）
-  { id: 'medicine', name: 'くすり', score: 0, weight: 0, color: '#90ee90', emoji: '1f48a', lifeHeal: 0.3, unlockLevel: 1 },
-  { id: 'hospital', name: 'びょういん', score: 0, weight: 0, color: '#98fb98', emoji: '1f3e5', lifeHeal: 1.0, unlockLevel: 1 }
+  { id: 'medicine', name: 'くすり', score: 0, weight: 1, color: '#90ee90', emoji: '1f48a', lifeHeal: 0.3, unlockLevel: 1 },
+  { id: 'hospital', name: 'びょういん', score: 0, weight: 1, color: '#98fb98', emoji: '1f3e5', lifeHeal: 1.0, unlockLevel: 1 }
 ];
