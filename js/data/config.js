@@ -84,7 +84,7 @@ const DIFFICULTIES = {
   },
   normal: {
     name: 'ふつう',
-    maxLevel: 110,
+    maxLevel: 60,
     spawnInterval: 600,
     itemRates: {
       initial: { plus: 0.80, damage: 0.18, heal: 0.02 },

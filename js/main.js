@@ -81,6 +81,11 @@
   const galleryScreen = document.getElementById('galleryScreen');
   const galleryGrid = document.getElementById('galleryGrid');
   const galleryStats = document.getElementById('galleryStats');
+  const characterDetailScreen = document.getElementById('characterDetailScreen');
+  const characterDetailImg = document.getElementById('characterDetailImg');
+  const characterDetailPlaceholder = document.getElementById('characterDetailPlaceholder');
+  const characterDetailName = document.getElementById('characterDetailName');
+  const characterDetailIntro = document.getElementById('characterDetailIntro');
   const completionScreen = document.getElementById('completionScreen');
   const completionStats = document.getElementById('completionStats');
   const gameOverScreen = document.getElementById('gameOverScreen');
@@ -97,9 +102,9 @@
   let lastTime = 0;
   let rafId = null;
   let gameState = 'HOME';
+  let galleryClosedAt = 0;
 
   function renderGallery() {
-    console.log('[Gallery] renderGallery called');
     if (!galleryGrid || !galleryStats) return;
     const order = typeof getGalleryOrder === 'function' ? getGalleryOrder() : [];
     const acquired = Gallery.load();
@@ -113,6 +118,7 @@
     for (const { id, level } of order) {
       const card = document.createElement('div');
       card.className = 'gallery-card' + (acquired.includes(id) ? '' : ' unknown');
+      card.dataset.charId = id;
       const char = CHARACTERS[id];
       if (acquired.includes(id) && char) {
         const img = document.createElement('img');
@@ -139,6 +145,7 @@
   }
 
   function openGallery() {
+    if (Date.now() - galleryClosedAt < 400) return;
     homeScreen.classList.add('hidden');
     homeScreen.style.display = 'none';
     renderGallery();
@@ -148,11 +155,47 @@
   }
 
   function closeGallery() {
+    galleryClosedAt = Date.now();
     galleryScreen.classList.add('hidden');
     galleryScreen.style.display = 'none';
+    characterDetailScreen.classList.add('hidden');
+    characterDetailScreen.style.display = 'none';
     homeScreen.classList.remove('hidden');
     homeScreen.style.display = 'flex';
     gameState = 'HOME';
+  }
+
+  function openCharacterDetail(charId) {
+    const char = CHARACTERS[charId];
+    const acquired = Gallery.load();
+    const isAcquired = acquired.includes(charId);
+    if (!characterDetailImg || !characterDetailName || !characterDetailIntro) return;
+    if (char && isAcquired) {
+      characterDetailImg.src = char.image;
+      characterDetailImg.alt = char.name;
+      characterDetailImg.style.display = '';
+      characterDetailPlaceholder?.classList.add('hidden');
+      characterDetailName.textContent = char.name;
+      characterDetailIntro.textContent = (char.intro !== undefined) ? char.intro : 'TODO';
+    } else {
+      characterDetailImg.style.display = 'none';
+      characterDetailPlaceholder?.classList.remove('hidden');
+      characterDetailName.textContent = '???';
+      characterDetailIntro.textContent = 'TODO';
+    }
+    galleryScreen.classList.add('hidden');
+    galleryScreen.style.display = 'none';
+    characterDetailScreen.classList.remove('hidden');
+    characterDetailScreen.style.display = 'flex';
+    gameState = 'CHARACTER_DETAIL';
+  }
+
+  function closeCharacterDetail() {
+    characterDetailScreen.classList.add('hidden');
+    characterDetailScreen.style.display = 'none';
+    galleryScreen.classList.remove('hidden');
+    galleryScreen.style.display = 'flex';
+    gameState = 'GALLERY';
   }
 
   function updateHighScoreDisplay() {
@@ -494,6 +537,8 @@
     completionScreen.classList.add('hidden');
     gameOverScreen.classList.add('hidden');
     galleryScreen?.classList.add('hidden');
+    characterDetailScreen?.classList.add('hidden');
+    characterDetailScreen && (characterDetailScreen.style.display = 'none');
     pauseScreen.classList.add('hidden');
     quitGameBtn.classList.add('hidden');
     quitGameBtn.style.display = 'none';
@@ -546,20 +591,37 @@
     const galleryBackBtn = document.getElementById('galleryBackBtn');
     addTapHandler(galleryBtn, openGallery);
     if (galleryBackBtn) {
-      console.log('[Gallery] galleryBackBtn found, attaching handlers');
       galleryBackBtn.addEventListener('pointerdown', (e) => {
-        console.log('[Gallery] pointerdown on galleryBackBtn');
         e.preventDefault();
         e.stopPropagation();
         closeGallery();
       }, { passive: false });
       galleryBackBtn.addEventListener('click', (e) => {
-        console.log('[Gallery] click on galleryBackBtn');
         e.preventDefault();
         closeGallery();
       });
     } else {
       console.warn('[Gallery] galleryBackBtn not found');
+    }
+    const characterDetailCloseBtn = document.getElementById('characterDetailCloseBtn');
+    if (characterDetailCloseBtn) {
+      characterDetailCloseBtn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeCharacterDetail();
+      }, { passive: false });
+      characterDetailCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeCharacterDetail();
+      });
+    }
+    if (galleryGrid) {
+      galleryGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.gallery-card');
+        if (card && card.dataset.charId) {
+          openCharacterDetail(card.dataset.charId);
+        }
+      });
     }
     addTapHandler(homeBtn, goHome);
     addTapHandler(retryBtn, goHome);

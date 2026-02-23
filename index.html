@@ -31,7 +31,7 @@
     </div>
     <button id="startBtn" class="btn">冒険に出発！</button>
     <button id="galleryBtn" class="btn btn-secondary">ギャラリー</button>
-    <span class="version">v0.1.5</span>
+    <span class="version">v0.1.6</span>
   </div>
 
   <div id="galleryScreen" class="overlay hidden">
@@ -39,6 +39,18 @@
     <p id="galleryStats" class="gallery-stats"></p>
     <div id="galleryGrid" class="gallery-grid"></div>
     <button id="galleryBackBtn" class="btn" type="button">ホームに戻る</button>
+  </div>
+
+  <div id="characterDetailScreen" class="overlay hidden">
+    <div class="character-detail">
+      <div id="characterDetailImgWrap" class="character-detail-img-wrap">
+        <img id="characterDetailImg" class="character-detail-img" src="" alt="">
+        <div id="characterDetailPlaceholder" class="character-detail-placeholder hidden">???</div>
+      </div>
+      <h3 id="characterDetailName" class="character-detail-name"></h3>
+      <p id="characterDetailIntro" class="character-detail-intro"></p>
+      <button id="characterDetailCloseBtn" class="btn" type="button">閉じる</button>
+    </div>
   </div>
 
   <div id="completionScreen" class="overlay hidden">
