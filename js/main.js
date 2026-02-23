@@ -166,7 +166,7 @@
   }
 
   function openCharacterDetail(charId) {
-    const char = CHARACTERS[charId];
+    const char = (typeof CHARACTERS !== 'undefined' && CHARACTERS[charId]) ? CHARACTERS[charId] : null;
     const acquired = Gallery.load();
     const isAcquired = acquired.includes(charId);
     if (!characterDetailImg || !characterDetailName || !characterDetailIntro) return;
@@ -174,14 +174,23 @@
       characterDetailImg.src = char.image;
       characterDetailImg.alt = char.name;
       characterDetailImg.style.display = '';
-      characterDetailPlaceholder?.classList.add('hidden');
+      if (characterDetailPlaceholder) {
+        characterDetailPlaceholder.classList.add('hidden');
+        characterDetailPlaceholder.style.display = 'none';
+      }
       characterDetailName.textContent = char.name;
-      characterDetailIntro.textContent = (char.intro !== undefined) ? char.intro : 'TODO';
+      const intro = (char.intro && String(char.intro).trim()) ? String(char.intro).trim() : 'TODO';
+      characterDetailIntro.textContent = intro;
+      characterDetailIntro.style.display = '';
     } else {
       characterDetailImg.style.display = 'none';
-      characterDetailPlaceholder?.classList.remove('hidden');
+      if (characterDetailPlaceholder) {
+        characterDetailPlaceholder.classList.remove('hidden');
+        characterDetailPlaceholder.style.display = '';
+      }
       characterDetailName.textContent = '???';
-      characterDetailIntro.textContent = 'TODO';
+      characterDetailIntro.textContent = '';
+      characterDetailIntro.style.display = 'none';
     }
     galleryScreen.classList.add('hidden');
     galleryScreen.style.display = 'none';
