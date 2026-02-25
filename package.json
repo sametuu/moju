@@ -1,6 +1,6 @@
 {
   "name": "moju",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "scripts": {
     "test:characters": "node test/characters-intro-test.js",
     "test": "echo 'test/index.html をブラウザで開いてテストを実行してください'"

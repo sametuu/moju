@@ -103,6 +103,17 @@
   let rafId = null;
   let gameState = 'HOME';
   let galleryClosedAt = 0;
+  const BUTTON_COOLDOWN_MS = 400;
+  let buttonLockUntil = 0;
+
+  function withButtonCooldown(handler) {
+    return function() {
+      const now = Date.now();
+      if (now < buttonLockUntil) return;
+      buttonLockUntil = now + BUTTON_COOLDOWN_MS;
+      handler();
+    };
+  }
 
   function renderGallery() {
     if (!galleryGrid || !galleryStats) return;
@@ -578,57 +589,54 @@
         console.warn('addTapHandler: element is null');
         return;
       }
-      let lastTouch = 0;
-      const safeHandler = () => {
+      const wrapped = withButtonCooldown(() => {
         try {
           handler();
         } catch (e) {
           console.error('addTapHandler handler error:', e);
         }
-      };
-      el.addEventListener('click', (e) => {
-        if (Date.now() - lastTouch < 400) return;
-        safeHandler();
       });
-      el.addEventListener('touchend', (e) => {
-        lastTouch = Date.now();
-        safeHandler();
-      }, { passive: true });
+      el.addEventListener('click', wrapped);
+      el.addEventListener('touchend', wrapped, { passive: true });
     }
     addTapHandler(startBtn, startGame);
     const galleryBtn = document.getElementById('galleryBtn');
     const galleryBackBtn = document.getElementById('galleryBackBtn');
     addTapHandler(galleryBtn, openGallery);
     if (galleryBackBtn) {
+      const closeGalleryWrapped = withButtonCooldown(() => {
+        closeGallery();
+      });
       galleryBackBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeGallery();
+        closeGalleryWrapped();
       }, { passive: false });
       galleryBackBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        closeGallery();
+        closeGalleryWrapped();
       });
     } else {
       console.warn('[Gallery] galleryBackBtn not found');
     }
     const characterDetailCloseBtn = document.getElementById('characterDetailCloseBtn');
     if (characterDetailCloseBtn) {
+      const closeDetailWrapped = withButtonCooldown(closeCharacterDetail);
       characterDetailCloseBtn.addEventListener('pointerdown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        closeCharacterDetail();
+        closeDetailWrapped();
       }, { passive: false });
       characterDetailCloseBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        closeCharacterDetail();
+        closeDetailWrapped();
       });
     }
     if (galleryGrid) {
       galleryGrid.addEventListener('click', (e) => {
         const card = e.target.closest('.gallery-card');
         if (card && card.dataset.charId) {
-          openCharacterDetail(card.dataset.charId);
+          withButtonCooldown(() => openCharacterDetail(card.dataset.charId))();
         }
       });
     }
